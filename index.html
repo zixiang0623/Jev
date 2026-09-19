@@ -1,11 +1,980 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>サンプルHTMLページ</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jev Console</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: oklch(96.5% 0.004 250);
+    --bg-2: oklch(93% 0.006 250);
+    --surface: oklch(99% 0.002 250 / 0.78);
+    --surface-solid: oklch(99% 0.002 250);
+    --border: oklch(87% 0.006 250);
+    --border-strong: oklch(78% 0.008 250);
+    --text: oklch(24% 0.012 260);
+    --text-muted: oklch(48% 0.014 260);
+    --text-faint: oklch(63% 0.012 260);
+    --accent: oklch(56% 0.17 258);
+    --accent-ink: oklch(99% 0.002 250);
+    --accent-soft: oklch(93% 0.03 258);
+    --noul: oklch(58% 0.15 200);
+    --choice: oklch(62% 0.16 155);
+    --score: oklch(60% 0.17 320);
+    --danger: oklch(55% 0.20 25);
+    --danger-soft: oklch(94% 0.05 25);
+    --success: oklch(58% 0.14 150);
+    --shadow: 0 1px 2px oklch(20% 0.02 260 / 0.06), 0 8px 24px oklch(20% 0.02 260 / 0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: oklch(19% 0.012 260);
+      --bg-2: oklch(23% 0.014 260);
+      --surface: oklch(27% 0.014 260 / 0.72);
+      --surface-solid: oklch(27% 0.014 260);
+      --border: oklch(36% 0.016 260);
+      --border-strong: oklch(46% 0.018 260);
+      --text: oklch(94% 0.006 260);
+      --text-muted: oklch(74% 0.012 260);
+      --text-faint: oklch(56% 0.012 260);
+      --accent: oklch(72% 0.15 258);
+      --accent-ink: oklch(15% 0.01 260);
+      --accent-soft: oklch(32% 0.05 258);
+      --noul: oklch(74% 0.13 200);
+      --choice: oklch(76% 0.13 155);
+      --score: oklch(76% 0.13 320);
+      --danger: oklch(72% 0.16 25);
+      --danger-soft: oklch(30% 0.07 25);
+      --success: oklch(74% 0.12 150);
+      --shadow: 0 1px 2px oklch(0% 0 0 / 0.3), 0 8px 24px oklch(0% 0 0 / 0.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, var(--bg-2), transparent),
+      var(--bg);
+    color: var(--text);
+    font: 400 15px/1.5 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(16px, 4vw, 40px) clamp(14px, 4vw, 28px) 64px;
+  }
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  header.top h1 {
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  header.top h1 .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  header.top p {
+    margin: 2px 0 0;
+    color: var(--text-muted);
+    font-size: 0.86rem;
+    letter-spacing: 0.005em;
+  }
+
+  .card {
+    background: var(--surface);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .settings {
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .settings label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .settings input[type="url"] {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+  .settings .save-state {
+    font-size: 0.74rem;
+    color: var(--text-faint);
+    min-width: 3.5em;
+    text-align: right;
+  }
+
+  input, textarea, select, button {
+    font: inherit;
+    color: inherit;
+  }
+  input[type="text"], input[type="url"], textarea, select {
+    width: 100%;
+    background: var(--surface-solid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+    outline: none;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  input[type="text"]:focus-visible, input[type="url"]:focus-visible,
+  textarea:focus-visible, select:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+  select { appearance: none; cursor: pointer; padding-right: 30px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-faint) 50%), linear-gradient(135deg, var(--text-faint) 50%, transparent 50%);
+    background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+
+  button {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-solid);
+    border-radius: var(--radius-sm);
+    padding: 8px 13px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: transform 90ms ease-out, background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+  }
+  button:hover { border-color: var(--border-strong); }
+  button:active { transform: scale(0.96); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: transparent;
+  }
+  button.primary:hover { filter: brightness(1.06); }
+  button.ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
+  button.ghost:hover { background: var(--bg-2); color: var(--text); }
+  button.danger-ghost { background: transparent; border-color: transparent; color: var(--danger); }
+  button.danger-ghost:hover { background: var(--danger-soft); }
+  button.sm { padding: 5px 9px; font-size: 0.76rem; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel { padding: 18px; }
+  .panel + .panel { margin-top: 18px; }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .panel-head h2 {
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+  }
+  .panel-head .hint { font-size: 0.76rem; color: var(--text-faint); }
+
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+  .qcard {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--surface-solid);
+  }
+  .qcard-head {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .qcard-head input[type="text"] { flex: 1 1 auto; font-weight: 600; }
+  .qcard-head select { flex: 0 0 auto; width: auto; min-width: 96px; }
+  .qcard-head button { flex: 0 0 auto; }
+
+  .type-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .type-tag.noul { background: color-mix(in oklch, var(--noul) 22%, transparent); color: var(--noul); }
+  .type-tag.choice { background: color-mix(in oklch, var(--choice) 22%, transparent); color: var(--choice); }
+  .type-tag.score { background: color-mix(in oklch, var(--score) 22%, transparent); color: var(--score); }
+
+  .row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+  .row input { flex: 1 1 auto; }
+  .row .key-input { flex: 0 0 34%; }
+  .row .idx {
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--bg-2);
+    color: var(--text-faint);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .add-row-btn { margin-top: 4px; }
+
+  .add-q-btn { width: 100%; margin-top: 4px; }
+
+  .run-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .run-bar button.primary { flex: 1 1 auto; padding: 11px 16px; font-size: 0.92rem; }
+
+  details.raw {
+    margin-top: 14px;
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+  }
+  details.raw summary {
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    list-style: none;
+  }
+  details.raw summary::-webkit-details-marker { display: none; }
+  details.raw summary::before { content: "▸ "; }
+  details.raw[open] summary::before { content: "▾ "; }
+  pre.code {
+    margin: 8px 0 0;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font: 12px/1.55 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text);
+  }
+
+  /* --- response panel states --- */
+  .resp-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-faint);
+    gap: 10px;
+  }
+  .resp-empty svg { opacity: 0.55; }
+  .resp-empty p { margin: 0; font-size: 0.85rem; }
+
+  .resp-loading { padding: 4px 0; }
+  .skeleton {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--bg-2) 25%, var(--border) 37%, var(--bg-2) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton { animation: none; opacity: 0.6; }
+  }
+
+  .resp-error {
+    background: var(--danger-soft);
+    border: 1px solid color-mix(in oklch, var(--danger) 40%, var(--border));
+    color: var(--danger);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+  .resp-error strong { display: block; margin-bottom: 3px; }
+
+  .ans-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 13px;
+    margin-bottom: 10px;
+    background: var(--surface-solid);
+  }
+  .ans-card:last-child { margin-bottom: 0; }
+  .ans-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .ans-name { font-weight: 700; font-size: 0.88rem; }
+  .ans-conf { font-size: 0.72rem; color: var(--text-faint); }
+
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .bar-label { flex: 0 0 34%; font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { flex: 1 1 auto; height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .bar-fill.noul { background: var(--noul); }
+  .bar-fill.choice { background: var(--choice); }
+  .bar-fill.choice.chosen { background: var(--choice); }
+  .bar-fill.score { background: var(--score); }
+  .bar-pct { flex: 0 0 3.4em; text-align: right; font-size: 0.76rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+  .choice-chosen-label {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .choice-chosen-label b { color: var(--choice); }
+
+  .score-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    margin-top: 6px;
+    gap: 6px;
+  }
+  .score-scale span { flex: 1 1 0; text-align: center; }
+  .score-value {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .usage-line {
+    margin-top: 12px;
+    font-size: 0.74rem;
+    color: var(--text-faint);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .footnote {
+    margin-top: 22px;
+    font-size: 0.76rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+  }
+  .footnote code {
+    background: var(--bg-2);
+    padding: 1px 5px;
+    border-radius: 5px;
+    font-size: 0.92em;
+  }
+</style>
 </head>
 <body>
-    <h1>ようこそ！</h1>
-    <p>これはサンプルのHTMLページです。</p>
+<div class="wrap">
+
+  <header class="top">
+    <h1><span class="dot"></span>Jev Console</h1>
+    <p>Cloudflare Workers AI 経由で <code>typesafe/jev</code> を試すプレイグラウンド</p>
+  </header>
+
+  <div class="card settings">
+    <label for="endpoint">Worker URL</label>
+    <input type="url" id="endpoint" placeholder="https://your-worker.your-subdomain.workers.dev" autocomplete="off" spellcheck="false">
+    <span class="save-state" id="saveState"></span>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: composer -->
+    <div>
+      <div class="card panel">
+        <div class="panel-head">
+          <h2>State（評価対象のデータ）</h2>
+          <span class="hint">文字列 or JSON</span>
+        </div>
+        <textarea id="stateInput" rows="4" placeholder="例: 3日間ずっと入金が失敗しています。至急対応してください。"></textarea>
+      </div>
+
+      <div class="card panel">
+        <div class="panel-head">
+          <h2>Questions</h2>
+          <span class="hint" id="qCount">0 件</span>
+        </div>
+
+        <div class="presets">
+          <button class="sm" data-preset="routing">例: 問い合わせ振り分け</button>
+          <button class="sm" data-preset="refund">例: 返金判定</button>
+          <button class="sm" data-preset="risk">例: アカウントリスク評価</button>
+        </div>
+
+        <div id="questions"></div>
+        <button class="add-q-btn" id="addQuestion">＋ 質問を追加</button>
+
+        <div class="run-bar">
+          <button class="primary" id="runBtn">実行</button>
+        </div>
+
+        <details class="raw">
+          <summary>送信するリクエストを見る</summary>
+          <pre class="code" id="reqPreview">{}</pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- RIGHT: response -->
+    <div class="card panel" id="respPanel">
+      <div class="panel-head">
+        <h2>Response</h2>
+        <span class="hint" id="respStatus"></span>
+      </div>
+      <div id="respBody">
+        <div class="resp-empty">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M14 20.5l4 4 8-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>State と Questions を入力して「実行」を押すと、<br>Jev の判定結果がここに表示されます。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    このHTMLはローカルのファイルとして開くか、任意の静的ホスティングに置いて使う想定です。Worker 側で
+    <code>Access-Control-Allow-Origin</code> を返していないと、ブラウザからの呼び出しが CORS でブロックされます。
+    リクエストは <code>{ state, questions }</code> をそのまま Worker に POST する形で送っています。
+  </p>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (sel, el = document) => el.querySelector(sel);
+  const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+
+  // ---------- endpoint persistence ----------
+  const endpointInput = $("#endpoint");
+  const saveState = $("#saveState");
+  const LS_KEY = "jev_console_endpoint";
+
+  endpointInput.value = localStorage.getItem(LS_KEY) || "";
+  let saveTimer = null;
+  endpointInput.addEventListener("input", () => {
+    saveState.textContent = "…";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(LS_KEY, endpointInput.value.trim());
+        saveState.textContent = "保存済み";
+        setTimeout(() => { if (saveState.textContent === "保存済み") saveState.textContent = ""; }, 1200);
+      } catch (e) {
+        saveState.textContent = "";
+      }
+    }, 400);
+  });
+
+  // ---------- question model ----------
+  let uidSeq = 1;
+  const newUid = () => "q" + (uidSeq++);
+
+  /** @type {Array<{uid:string,name:string,type:'noul'|'choice'|'score',instructions:string,boolTrue:string,boolFalse:string,choices:{key:string,desc:string}[],levels:string[]}>} */
+  let questions = [];
+
+  function blankQuestion(overrides = {}) {
+    return Object.assign({
+      uid: newUid(),
+      name: "",
+      type: "noul",
+      instructions: "",
+      boolTrue: "",
+      boolFalse: "",
+      choices: [{ key: "", desc: "" }, { key: "", desc: "" }],
+      levels: ["", ""]
+    }, overrides);
+  }
+
+  const questionsEl = $("#questions");
+  const qCountEl = $("#qCount");
+
+  function renderQuestions() {
+    qCountEl.textContent = questions.length + " 件";
+    if (questions.length === 0) {
+      questionsEl.innerHTML = "";
+      updateRequestPreview();
+      return;
+    }
+    questionsEl.innerHTML = questions.map(q => qcardHTML(q)).join("");
+    updateRequestPreview();
+  }
+
+  function qcardHTML(q) {
+    const typeTag = q.type === "noul" ? '<span class="type-tag noul">Yes/No</span>'
+                  : q.type === "choice" ? '<span class="type-tag choice">分類</span>'
+                  : '<span class="type-tag score">スコア</span>';
+    let criteriaHTML = "";
+    if (q.type === "noul") {
+      criteriaHTML = `
+        <div class="field">
+          <span class="field-label">判定基準（任意）</span>
+          <div class="row"><input type="text" class="jf" data-uid="${q.uid}" data-f="boolTrue" placeholder="true の説明（例: 明確に緊急性がある）" value="${esc(q.boolTrue)}"></div>
+          <div class="row"><input type="text" class="jf" data-uid="${q.uid}" data-f="boolFalse" placeholder="false の説明（例: 緊急性はない）" value="${esc(q.boolFalse)}"></div>
+        </div>`;
+    } else if (q.type === "choice") {
+      criteriaHTML = `
+        <div class="field">
+          <span class="field-label">選択肢</span>
+          ${q.choices.map((c, i) => `
+            <div class="row">
+              <input type="text" class="key-input jc" data-uid="${q.uid}" data-i="${i}" data-f="key" placeholder="キー(例: billing)" value="${esc(c.key)}">
+              <input type="text" class="jc" data-uid="${q.uid}" data-i="${i}" data-f="desc" placeholder="説明" value="${esc(c.desc)}">
+              <button class="ghost sm remove-choice" data-uid="${q.uid}" data-i="${i}" title="削除" ${q.choices.length <= 1 ? "disabled" : ""}>×</button>
+            </div>`).join("")}
+          <button class="ghost sm add-row-btn add-choice" data-uid="${q.uid}">＋ 選択肢を追加</button>
+        </div>`;
+    } else {
+      criteriaHTML = `
+        <div class="field">
+          <span class="field-label">段階（低い順 → 高い順）</span>
+          ${q.levels.map((lv, i) => `
+            <div class="row">
+              <span class="idx">${i}</span>
+              <input type="text" class="jl" data-uid="${q.uid}" data-i="${i}" placeholder="段階 ${i} の説明" value="${esc(lv)}">
+              <button class="ghost sm remove-level" data-uid="${q.uid}" data-i="${i}" title="削除" ${q.levels.length <= 2 ? "disabled" : ""}>×</button>
+            </div>`).join("")}
+          <button class="ghost sm add-row-btn add-level" data-uid="${q.uid}">＋ 段階を追加</button>
+        </div>`;
+    }
+
+    return `
+      <div class="qcard" data-uid="${q.uid}">
+        <div class="qcard-head">
+          <input type="text" class="jf" data-uid="${q.uid}" data-f="name" placeholder="質問名 (例: is_urgent)" value="${esc(q.name)}">
+          <select class="jf" data-uid="${q.uid}" data-f="type">
+            <option value="noul" ${q.type === "noul" ? "selected" : ""}>Yes/No</option>
+            <option value="choice" ${q.type === "choice" ? "selected" : ""}>分類</option>
+            <option value="score" ${q.type === "score" ? "selected" : ""}>スコア</option>
+          </select>
+          <button class="danger-ghost sm remove-q" data-uid="${q.uid}" title="この質問を削除">削除</button>
+        </div>
+        <div class="field">
+          <span class="field-label">指示内容 ${typeTag}</span>
+          <textarea class="jf" data-uid="${q.uid}" data-f="instructions" rows="2" placeholder="例: このチケットはどの部署が対応すべきですか？">${esc(q.instructions)}</textarea>
+        </div>
+        ${criteriaHTML}
+      </div>`;
+  }
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function findQ(uid) { return questions.find(q => q.uid === uid); }
+
+  // event delegation for the questions container
+  questionsEl.addEventListener("input", (e) => {
+    const t = e.target;
+    const uid = t.dataset.uid;
+    if (!uid) return;
+    const q = findQ(uid);
+    if (!q) return;
+
+    if (t.classList.contains("jf")) {
+      const f = t.dataset.f;
+      q[f] = t.value;
+      if (f === "name") updateRequestPreview();
+    } else if (t.classList.contains("jc")) {
+      const i = Number(t.dataset.i);
+      q.choices[i][t.dataset.f] = t.value;
+    } else if (t.classList.contains("jl")) {
+      const i = Number(t.dataset.i);
+      q.levels[i] = t.value;
+    }
+    updateRequestPreview();
+  });
+
+  questionsEl.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.tagName === "SELECT" && t.dataset.f === "type") {
+      const q = findQ(t.dataset.uid);
+      if (q) { q.type = t.value; renderQuestions(); }
+    }
+  });
+
+  questionsEl.addEventListener("click", (e) => {
+    const t = e.target.closest("button");
+    if (!t) return;
+    const uid = t.dataset.uid;
+    const q = findQ(uid);
+
+    if (t.classList.contains("remove-q")) {
+      questions = questions.filter(x => x.uid !== uid);
+      renderQuestions();
+    } else if (t.classList.contains("add-choice") && q) {
+      q.choices.push({ key: "", desc: "" });
+      renderQuestions();
+    } else if (t.classList.contains("remove-choice") && q) {
+      const i = Number(t.dataset.i);
+      q.choices.splice(i, 1);
+      renderQuestions();
+    } else if (t.classList.contains("add-level") && q) {
+      q.levels.push("");
+      renderQuestions();
+    } else if (t.classList.contains("remove-level") && q) {
+      const i = Number(t.dataset.i);
+      q.levels.splice(i, 1);
+      renderQuestions();
+    }
+  });
+
+  $("#addQuestion").addEventListener("click", () => {
+    questions.push(blankQuestion());
+    renderQuestions();
+  });
+
+  const stateInput = $("#stateInput");
+  stateInput.addEventListener("input", updateRequestPreview);
+
+  // ---------- presets ----------
+  const PRESETS = {
+    routing: {
+      state: "パスワードを変更したらログインできなくなりました。再設定メールも届きません。",
+      questions: [
+        blankQuestion({
+          name: "department",
+          type: "choice",
+          instructions: "この問い合わせはどの部署が対応すべきですか？",
+          choices: [
+            { key: "account", desc: "ログイン、パスワード、プロフィール、セキュリティ関連" },
+            { key: "billing", desc: "請求、請求書、返金、サブスク関連" },
+            { key: "technical", desc: "製品の不具合、障害、連携の問題" },
+            { key: "other", desc: "上記に当てはまらない問い合わせ" }
+          ]
+        })
+      ]
+    },
+    refund: {
+      state: JSON.stringify({
+        ticket: { subject: "二重請求", message: "注文A-104で2回請求されました。重複分を返金してください。" },
+        order: { id: "A-104", charges: [{ amount: 4900, status: "captured" }, { amount: 4900, status: "captured" }] },
+        policy: "重複請求は返金対象です。"
+      }, null, 2),
+      questions: [
+        blankQuestion({ name: "refund_requested", type: "noul", instructions: "ticket.message は返金を求めていますか？" }),
+        blankQuestion({ name: "policy_supports_refund", type: "noul", instructions: "order.charges を踏まえて、policy はこの返金要求を支持していますか？" })
+      ]
+    },
+    risk: {
+      state: JSON.stringify({
+        account_age_days: 12,
+        recent_events: ["5回連続でログイン失敗", "普段と異なる国からパスワードリセット要求", "普段のデバイスからのログイン成功"],
+        account_verified: true
+      }, null, 2),
+      questions: [
+        blankQuestion({
+          name: "risk_level",
+          type: "score",
+          instructions: "このアカウントの活動はどの程度リスクが高いですか？",
+          levels: ["低リスク: 通常の利用と一致している", "中リスク: 一部不審な動きがあり監視が必要", "高リスク: 乗っ取りを示す強い兆候が複数ある"]
+        }),
+        blankQuestion({
+          name: "escalate",
+          type: "noul",
+          instructions: "このアカウントは人による確認にエスカレーションすべきですか？",
+          boolTrue: "即座に人による確認が必要",
+          boolFalse: "通常の自動対応で問題ない"
+        })
+      ]
+    }
+  };
+
+  $$(".presets [data-preset]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const p = PRESETS[btn.dataset.preset];
+      if (!p) return;
+      stateInput.value = p.state;
+      questions = p.questions.map(q => blankQuestion(q));
+      renderQuestions();
+    });
+  });
+
+  // ---------- request building ----------
+  const reqPreview = $("#reqPreview");
+
+  function parseState(raw) {
+    const trimmed = raw.trim();
+    if (!trimmed) return "";
+    try { return JSON.parse(trimmed); } catch (e) { return raw; }
+  }
+
+  function buildQuestionsPayload() {
+    const out = {};
+    for (const q of questions) {
+      const name = q.name.trim();
+      if (!name) continue;
+      const instructions = q.instructions.trim();
+      if (q.type === "noul") {
+        const entry = { type: "noul", instructions };
+        const t = q.boolTrue.trim(), f = q.boolFalse.trim();
+        if (t || f) {
+          entry.criteria = {};
+          if (t) entry.criteria.true = t;
+          if (f) entry.criteria.false = f;
+        }
+        out[name] = entry;
+      } else if (q.type === "choice") {
+        const criteria = {};
+        for (const c of q.choices) {
+          const k = c.key.trim();
+          if (k) criteria[k] = c.desc.trim();
+        }
+        out[name] = { type: "choice", instructions, criteria };
+      } else {
+        const levels = q.levels.map(l => l.trim()).filter(Boolean);
+        out[name] = { type: "score", instructions, criteria: levels };
+      }
+    }
+    return out;
+  }
+
+  function buildRequestBody() {
+    return {
+      state: parseState(stateInput.value),
+      questions: buildQuestionsPayload()
+    };
+  }
+
+  function updateRequestPreview() {
+    reqPreview.textContent = JSON.stringify(buildRequestBody(), null, 2);
+  }
+
+  // ---------- run ----------
+  const runBtn = $("#runBtn");
+  const respBody = $("#respBody");
+  const respStatus = $("#respStatus");
+
+  function setEmptyState() {
+    respStatus.textContent = "";
+    respBody.innerHTML = `
+      <div class="resp-empty">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M14 20.5l4 4 8-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p>State と Questions を入力して「実行」を押すと、<br>Jev の判定結果がここに表示されます。</p>
+      </div>`;
+  }
+
+  function setLoadingState() {
+    respStatus.textContent = "実行中…";
+    respBody.innerHTML = `
+      <div class="resp-loading">
+        <div class="skeleton" style="width:70%"></div>
+        <div class="skeleton" style="width:100%"></div>
+        <div class="skeleton" style="width:85%"></div>
+        <div class="skeleton" style="width:55%"></div>
+      </div>`;
+  }
+
+  function setErrorState(message, detail) {
+    respStatus.textContent = "エラー";
+    respBody.innerHTML = `
+      <div class="resp-error">
+        <strong>実行できませんでした</strong>
+        ${esc(message)}
+        ${detail ? `<pre class="code" style="margin-top:8px;">${esc(detail)}</pre>` : ""}
+      </div>`;
+  }
+
+  function pct(n) { return Math.round(Math.max(0, Math.min(1, n)) * 100); }
+
+  function renderNoul(name, ans) {
+    const p = typeof ans.noul === "number" ? ans.noul : 0;
+    return `
+      <div class="ans-card">
+        <div class="ans-head"><span class="ans-name">${esc(name)}</span></div>
+        <div class="bar-row">
+          <span class="bar-label">はい (true)</span>
+          <div class="bar-track"><div class="bar-fill noul" style="width:${pct(p)}%"></div></div>
+          <span class="bar-pct">${pct(p)}%</span>
+        </div>
+      </div>`;
+  }
+
+  function renderChoice(name, ans) {
+    const probs = ans.probabilities || {};
+    const keys = Object.keys(probs);
+    const rows = keys.map(k => `
+      <div class="bar-row">
+        <span class="bar-label" title="${esc(k)}">${esc(k)}</span>
+        <div class="bar-track"><div class="bar-fill choice ${k === ans.choice ? "chosen" : ""}" style="width:${pct(probs[k])}%"></div></div>
+        <span class="bar-pct">${pct(probs[k])}%</span>
+      </div>`).join("");
+    return `
+      <div class="ans-card">
+        <div class="ans-head">
+          <span class="ans-name">${esc(name)}</span>
+          <span class="ans-conf">${typeof ans.confidence === "number" ? "confidence " + pct(ans.confidence) + "%" : ""}</span>
+        </div>
+        <div class="choice-chosen-label">選択結果: <b>${esc(ans.choice ?? "-")}</b></div>
+        ${rows}
+      </div>`;
+  }
+
+  function renderScore(name, ans) {
+    const legend = ans.legend || {};
+    const probs = ans.probabilities || {};
+    const keys = Object.keys(legend).length ? Object.keys(legend) : Object.keys(probs);
+    const rows = keys.map(k => `
+      <div class="bar-row">
+        <span class="bar-label" title="${esc(legend[k] || k)}">${esc(legend[k] || k)}</span>
+        <div class="bar-track"><div class="bar-fill score" style="width:${pct(probs[k] || 0)}%"></div></div>
+        <span class="bar-pct">${pct(probs[k] || 0)}%</span>
+      </div>`).join("");
+    return `
+      <div class="ans-card">
+        <div class="ans-head">
+          <span class="ans-name">${esc(name)}</span>
+          <span class="ans-conf">${typeof ans.confidence === "number" ? "confidence " + pct(ans.confidence) + "%" : ""}</span>
+        </div>
+        <div class="score-value">score: <b>${typeof ans.score === "number" ? ans.score.toFixed(2) : "-"}</b></div>
+        ${rows}
+      </div>`;
+  }
+
+  function renderSuccess(json) {
+    const result = (json && typeof json === "object" && "result" in json && "success" in json) ? json.result : json;
+    const answers = (result && result.answers) || {};
+    const usage = (result && result.usage) || null;
+    const names = Object.keys(answers);
+
+    let html = "";
+    if (names.length === 0) {
+      html += `<div class="resp-error"><strong>質問への回答が見つかりません</strong>Workerからのレスポンス形式を確認してください。</div>`;
+    } else {
+      for (const name of names) {
+        const ans = answers[name];
+        if (!ans || !ans.type) continue;
+        if (ans.type === "noul") html += renderNoul(name, ans);
+        else if (ans.type === "choice") html += renderChoice(name, ans);
+        else if (ans.type === "score") html += renderScore(name, ans);
+      }
+    }
+    if (usage) {
+      html += `<div class="usage-line">
+        <span>input_tokens: ${usage.input_tokens ?? "-"}</span>
+        <span>output_tokens: ${usage.output_tokens ?? "-"}</span>
+        ${result.model ? `<span>model: ${esc(result.model)}</span>` : ""}
+      </div>`;
+    }
+    html += `<details class="raw"><summary>Raw JSON</summary><pre class="code">${esc(JSON.stringify(json, null, 2))}</pre></details>`;
+    respStatus.textContent = "完了";
+    respBody.innerHTML = html;
+  }
+
+  async function run() {
+    const url = endpointInput.value.trim();
+    if (!url) {
+      endpointInput.focus();
+      setErrorState("先に Worker URL を入力してください。");
+      return;
+    }
+    const body = buildRequestBody();
+    if (Object.keys(body.questions).length === 0) {
+      setErrorState("質問を1つ以上追加し、質問名を入力してください。");
+      return;
+    }
+
+    runBtn.disabled = true;
+    setLoadingState();
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch (e) { json = null; }
+
+      if (!res.ok) {
+        setErrorState(`Worker がステータス ${res.status} を返しました。`, json ? JSON.stringify(json, null, 2) : text.slice(0, 800));
+        return;
+      }
+      if (json === null) {
+        setErrorState("レスポンスをJSONとして解釈できませんでした。", text.slice(0, 800));
+        return;
+      }
+      renderSuccess(json);
+    } catch (err) {
+      setErrorState(
+        "リクエストに失敗しました。URLが正しいか、Worker側でCORS（Access-Control-Allow-Origin）が許可されているかを確認してください。",
+        String(err)
+      );
+    } finally {
+      runBtn.disabled = false;
+    }
+  }
+
+  runBtn.addEventListener("click", run);
+
+  // ---------- init ----------
+  questions = [blankQuestion({
+    name: "is_urgent",
+    type: "noul",
+    instructions: "この内容は緊急性を伝えていますか？",
+    boolTrue: "明確に時間的猶予がない",
+    boolFalse: "緊急性は感じられない"
+  })];
+  renderQuestions();
+  setEmptyState();
+})();
+</script>
 </body>
 </html>
