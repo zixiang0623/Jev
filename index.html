@@ -106,31 +106,6 @@
     box-shadow: var(--shadow);
   }
 
-  .settings {
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .settings label {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-    font-weight: 600;
-  }
-  .settings input[type="url"] {
-    flex: 1 1 260px;
-    min-width: 0;
-  }
-  .settings .save-state {
-    font-size: 0.74rem;
-    color: var(--text-faint);
-    min-width: 3.5em;
-    text-align: right;
-  }
-
   input, textarea, select, button {
     font: inherit;
     color: inherit;
@@ -423,12 +398,6 @@
     <p>Cloudflare Workers AI 経由で <code>typesafe/jev</code> を試すプレイグラウンド</p>
   </header>
 
-  <div class="card settings">
-    <label for="endpoint">Worker URL</label>
-    <input type="url" id="endpoint" placeholder="https://your-worker.your-subdomain.workers.dev" autocomplete="off" spellcheck="false">
-    <span class="save-state" id="saveState"></span>
-  </div>
-
   <div class="grid">
     <!-- LEFT: composer -->
     <div>
@@ -485,9 +454,8 @@
   </div>
 
   <p class="footnote">
-    このHTMLはローカルのファイルとして開くか、任意の静的ホスティングに置いて使う想定です。Worker 側で
-    <code>Access-Control-Allow-Origin</code> を返していないと、ブラウザからの呼び出しが CORS でブロックされます。
-    リクエストは <code>{ state, questions }</code> をそのまま Worker に POST する形で送っています。
+    このページ自体が Cloudflare Worker から配信されており、同じ Worker に <code>POST</code> で
+    <code>{ state, questions }</code> を送って <code>env.AI.run("typesafe/jev", ...)</code> を実行しています。
   </p>
 
 </div>
@@ -498,27 +466,6 @@
 
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
-
-  // ---------- endpoint persistence ----------
-  const endpointInput = $("#endpoint");
-  const saveState = $("#saveState");
-  const LS_KEY = "jev_console_endpoint";
-
-  endpointInput.value = localStorage.getItem(LS_KEY) || "";
-  let saveTimer = null;
-  endpointInput.addEventListener("input", () => {
-    saveState.textContent = "…";
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      try {
-        localStorage.setItem(LS_KEY, endpointInput.value.trim());
-        saveState.textContent = "保存済み";
-        setTimeout(() => { if (saveState.textContent === "保存済み") saveState.textContent = ""; }, 1200);
-      } catch (e) {
-        saveState.textContent = "";
-      }
-    }, 400);
-  });
 
   // ---------- question model ----------
   let uidSeq = 1;
@@ -919,12 +866,6 @@
   }
 
   async function run() {
-    const url = endpointInput.value.trim();
-    if (!url) {
-      endpointInput.focus();
-      setErrorState("先に Worker URL を入力してください。");
-      return;
-    }
     const body = buildRequestBody();
     if (Object.keys(body.questions).length === 0) {
       setErrorState("質問を1つ以上追加し、質問名を入力してください。");
@@ -934,7 +875,7 @@
     runBtn.disabled = true;
     setLoadingState();
     try {
-      const res = await fetch(url, {
+      const res = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
@@ -953,10 +894,7 @@
       }
       renderSuccess(json);
     } catch (err) {
-      setErrorState(
-        "リクエストに失敗しました。URLが正しいか、Worker側でCORS（Access-Control-Allow-Origin）が許可されているかを確認してください。",
-        String(err)
-      );
+      setErrorState("リクエストに失敗しました。Worker側のログ(wrangler tail)を確認してください。", String(err));
     } finally {
       runBtn.disabled = false;
     }
