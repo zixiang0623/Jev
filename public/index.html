@@ -2180,6 +2180,15 @@ body.mode-persuade {
   "use strict";
   const $ = (id) => document.getElementById(id);
 
+  // Workerからの応答は複数の形で返ってくることがあるため、answersを持つ階層まで自動でたどる
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
+
   const NODES = [
     {
       key: "melchior",
@@ -2284,7 +2293,7 @@ body.mode-persuade {
       }
 
       rawJson.textContent = JSON.stringify(json, null, 2);
-      const answers = json.answers || {};
+      const answers = unwrapAnswers(json);
 
       const votes = [];
       let delay = 300;
@@ -2367,6 +2376,15 @@ body.mode-persuade {
 
 (() => {
   "use strict";
+
+  // Workerからの応答は複数の形で返ってくることがあるため、answersを持つ階層まで自動でたどる
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
 
   // ---------- pure game logic ----------
   const ROWS = 20, COLS = 10, CELL = 24;
@@ -2697,7 +2715,7 @@ body.mode-persuade {
     if (!res.ok || json === null) {
       throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
     }
-    const ans = json.answers && json.answers.move;
+    const ans = unwrapAnswers(json).move;
     if (!ans || typeof ans.choice !== "string") {
       throw new Error("Jevの応答から choice が取得できませんでした: " + JSON.stringify(json));
     }
@@ -2815,6 +2833,15 @@ body.mode-persuade {
 
 (() => {
   "use strict";
+
+  // Workerからの応答は複数の形で返ってくることがあるため、answersを持つ階層まで自動でたどる
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
 
   const CATEGORIES = {
     work: "仕事関連(会議、プロジェクト、社内連絡、タスク依頼など)",
@@ -3010,7 +3037,7 @@ body.mode-persuade {
     if (!res.ok || json === null) {
       throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
     }
-    return json.answers || {};
+    return unwrapAnswers(json);
   }
 
   let isRunning = false;
@@ -3086,6 +3113,15 @@ body.mode-persuade {
 
 (() => {
   "use strict";
+
+  // Workerからの応答は複数の形で返ってくることがあるため、answersを持つ階層まで自動でたどる
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
 
   // ---------- ローマ字 -> ひらがな ----------
   const SMALL_Y = { a: 'ゃ', u: 'ゅ', o: 'ょ' };
@@ -3299,7 +3335,7 @@ body.mode-persuade {
         let json;
         try { json = JSON.parse(text); } catch (e) { json = null; }
         if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
-        const answers = json.answers || {};
+        const answers = unwrapAnswers(json);
         ambiguous.forEach((t, idx) => {
           const ans = answers["w" + idx];
           const validKanji = t.candidates.map(c => c.k);
@@ -3354,6 +3390,15 @@ body.mode-persuade {
 
 (() => {
   "use strict";
+
+  // Workerからの応答は複数の形で返ってくることがあるため、answersを持つ階層まで自動でたどる
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
 
   // ---------- レベルロジック ----------
   const CORRECT_ACTION = { gap: 'jump', enemy_ground: 'jump', enemy_flying: 'duck', coin: 'jump', clear: 'run' };
@@ -3668,7 +3713,7 @@ body.mode-persuade {
     let json;
     try { json = JSON.parse(text); } catch (e) { json = null; }
     if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
-    const answers = json.answers || {};
+    const answers = unwrapAnswers(json);
     const result = {};
     level.forEach(seg => {
       const ans = answers["s" + seg.index];
@@ -3730,6 +3775,15 @@ body.mode-persuade {
 
 (() => {
   "use strict";
+
+  // Workerからの応答は複数の形で返ってくることがあるため、answersを持つ階層まで自動でたどる
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
 
   const WIN_THRESHOLD = 0.7;
 
@@ -3865,7 +3919,7 @@ body.mode-persuade {
     let json;
     try { json = JSON.parse(text); } catch (e) { json = null; }
     if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
-    const ans = json.answers && json.answers.verdict;
+    const ans = unwrapAnswers(json).verdict;
     if (!ans || typeof ans.noul !== "number") throw new Error("Jevの応答からnoulが取得できませんでした: " + JSON.stringify(json));
     return ans.noul;
   }
