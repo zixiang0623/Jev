@@ -3,9 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jev Console</title>
+<title>Jev Console / MAGI SYSTEM</title>
 <style>
-  :root {
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { min-height: 100vh; }
+  .view[hidden] { display: none; }
+
+  .mode-switch {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px;
+    background: oklch(15% 0.01 260 / 0.78);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid oklch(100% 0 0 / 0.08);
+  }
+  .mode-switch button {
+    font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    letter-spacing: 0.03em;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid oklch(100% 0 0 / 0.14);
+    background: oklch(100% 0 0 / 0.05);
+    color: oklch(90% 0.01 260);
+    cursor: pointer;
+    transition: background 150ms ease, transform 90ms ease-out, box-shadow 150ms ease;
+  }
+  .mode-switch button:hover { background: oklch(100% 0 0 / 0.12); }
+  .mode-switch button:active { transform: scale(0.96); }
+  .mode-switch button[aria-pressed="true"] {
+    background: oklch(100% 0 0 / 0.2);
+    box-shadow: 0 0 0 1px oklch(100% 0 0 / 0.32) inset;
+  }
+  .mode-switch button:focus-visible { outline: 2px solid oklch(80% 0.15 250); outline-offset: 2px; }
+
+#view-console {
     color-scheme: light dark;
     --bg: oklch(96.5% 0.004 250);
     --bg-2: oklch(93% 0.006 250);
@@ -29,8 +69,7 @@
     --radius: 16px;
     --radius-sm: 10px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
+@media (prefers-color-scheme: dark) {#view-console {
       --bg: oklch(19% 0.012 260);
       --bg-2: oklch(23% 0.014 260);
       --surface: oklch(27% 0.014 260 / 0.72);
@@ -50,11 +89,10 @@
       --danger-soft: oklch(30% 0.07 25);
       --success: oklch(74% 0.12 150);
       --shadow: 0 1px 2px oklch(0% 0 0 / 0.3), 0 8px 24px oklch(0% 0 0 / 0.35);
-    }
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
+    }}
+#view-console * { box-sizing: border-box; }
+body.mode-console { margin: 0; padding: 0; }
+body.mode-console {
     min-height: 100vh;
     background:
       radial-gradient(1200px 600px at 15% -10%, var(--bg-2), transparent),
@@ -63,12 +101,12 @@
     font: 400 15px/1.5 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap {
+#view-console .wrap {
     max-width: 1180px;
     margin: 0 auto;
     padding: clamp(16px, 4vw, 40px) clamp(14px, 4vw, 28px) 64px;
   }
-  header.top {
+#view-console header.top {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -76,7 +114,7 @@
     flex-wrap: wrap;
     margin-bottom: 20px;
   }
-  header.top h1 {
+#view-console header.top h1 {
     font-size: clamp(1.3rem, 2.4vw, 1.7rem);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -85,19 +123,18 @@
     align-items: center;
     gap: 10px;
   }
-  header.top h1 .dot {
+#view-console header.top h1 .dot {
     width: 9px; height: 9px; border-radius: 50%;
     background: var(--accent);
     box-shadow: 0 0 0 4px var(--accent-soft);
   }
-  header.top p {
+#view-console header.top p {
     margin: 2px 0 0;
     color: var(--text-muted);
     font-size: 0.86rem;
     letter-spacing: 0.005em;
   }
-
-  .card {
+#view-console .card {
     background: var(--surface);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -105,12 +142,11 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
   }
-
-  input, textarea, select, button {
+#view-console input, #view-console textarea, #view-console select, #view-console button {
     font: inherit;
     color: inherit;
   }
-  input[type="text"], input[type="url"], textarea, select {
+#view-console input[type="text"], #view-console input[type="url"], #view-console textarea, #view-console select {
     width: 100%;
     background: var(--surface-solid);
     border: 1px solid var(--border);
@@ -119,22 +155,20 @@
     outline: none;
     transition: border-color 120ms ease, box-shadow 120ms ease;
   }
-  input[type="text"]:focus-visible, input[type="url"]:focus-visible,
-  textarea:focus-visible, select:focus-visible {
+#view-console input[type="text"]:focus-visible, #view-console input[type="url"]:focus-visible, #view-console textarea:focus-visible, #view-console select:focus-visible {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
-  textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
-  select { appearance: none; cursor: pointer; padding-right: 30px;
+#view-console textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+#view-console select { appearance: none; cursor: pointer; padding-right: 30px;
     background-image: linear-gradient(45deg, transparent 50%, var(--text-faint) 50%), linear-gradient(135deg, var(--text-faint) 50%, transparent 50%);
     background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
   }
-
-  .field { margin-bottom: 12px; }
-  .field:last-child { margin-bottom: 0; }
-  .field-label {
+#view-console .field { margin-bottom: 12px; }
+#view-console .field:last-child { margin-bottom: 0; }
+#view-console .field-label {
     display: block;
     font-size: 0.76rem;
     font-weight: 600;
@@ -142,8 +176,7 @@
     margin-bottom: 5px;
     letter-spacing: 0.01em;
   }
-
-  button {
+#view-console button {
     cursor: pointer;
     border: 1px solid var(--border);
     background: var(--surface-solid);
@@ -153,68 +186,61 @@
     font-size: 0.85rem;
     transition: transform 90ms ease-out, background 120ms ease, border-color 120ms ease, opacity 120ms ease;
   }
-  button:hover { border-color: var(--border-strong); }
-  button:active { transform: scale(0.96); }
-  button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  button.primary {
+#view-console button:hover { border-color: var(--border-strong); }
+#view-console button:active { transform: scale(0.96); }
+#view-console button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+#view-console button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#view-console button.primary {
     background: var(--accent);
     color: var(--accent-ink);
     border-color: transparent;
   }
-  button.primary:hover { filter: brightness(1.06); }
-  button.ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
-  button.ghost:hover { background: var(--bg-2); color: var(--text); }
-  button.danger-ghost { background: transparent; border-color: transparent; color: var(--danger); }
-  button.danger-ghost:hover { background: var(--danger-soft); }
-  button.sm { padding: 5px 9px; font-size: 0.76rem; }
-
-  .grid {
+#view-console button.primary:hover { filter: brightness(1.06); }
+#view-console button.ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
+#view-console button.ghost:hover { background: var(--bg-2); color: var(--text); }
+#view-console button.danger-ghost { background: transparent; border-color: transparent; color: var(--danger); }
+#view-console button.danger-ghost:hover { background: var(--danger-soft); }
+#view-console button.sm { padding: 5px 9px; font-size: 0.76rem; }
+#view-console .grid {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     gap: 18px;
     align-items: start;
   }
-  @media (max-width: 860px) {
-    .grid { grid-template-columns: 1fr; }
-  }
-
-  .panel { padding: 18px; }
-  .panel + .panel { margin-top: 18px; }
-  .panel-head {
+@media (max-width: 860px) {#view-console .grid { grid-template-columns: 1fr; }}
+#view-console .panel { padding: 18px; }
+#view-console .panel + .panel { margin-top: 18px; }
+#view-console .panel-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 12px;
     gap: 8px;
   }
-  .panel-head h2 {
+#view-console .panel-head h2 {
     font-size: 0.95rem;
     margin: 0;
     font-weight: 700;
     letter-spacing: -0.005em;
   }
-  .panel-head .hint { font-size: 0.76rem; color: var(--text-faint); }
-
-  .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-
-  .qcard {
+#view-console .panel-head .hint { font-size: 0.76rem; color: var(--text-faint); }
+#view-console .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+#view-console .qcard {
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 12px;
     margin-bottom: 10px;
     background: var(--surface-solid);
   }
-  .qcard-head {
+#view-console .qcard-head {
     display: flex;
     gap: 8px;
     margin-bottom: 10px;
   }
-  .qcard-head input[type="text"] { flex: 1 1 auto; font-weight: 600; }
-  .qcard-head select { flex: 0 0 auto; width: auto; min-width: 96px; }
-  .qcard-head button { flex: 0 0 auto; }
-
-  .type-tag {
+#view-console .qcard-head input[type="text"] { flex: 1 1 auto; font-weight: 600; }
+#view-console .qcard-head select { flex: 0 0 auto; width: auto; min-width: 96px; }
+#view-console .qcard-head button { flex: 0 0 auto; }
+#view-console .type-tag {
     display: inline-block;
     font-size: 0.68rem;
     font-weight: 700;
@@ -223,14 +249,13 @@
     margin-left: 6px;
     vertical-align: middle;
   }
-  .type-tag.noul { background: color-mix(in oklch, var(--noul) 22%, transparent); color: var(--noul); }
-  .type-tag.choice { background: color-mix(in oklch, var(--choice) 22%, transparent); color: var(--choice); }
-  .type-tag.score { background: color-mix(in oklch, var(--score) 22%, transparent); color: var(--score); }
-
-  .row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
-  .row input { flex: 1 1 auto; }
-  .row .key-input { flex: 0 0 34%; }
-  .row .idx {
+#view-console .type-tag.noul { background: color-mix(in oklch, var(--noul) 22%, transparent); color: var(--noul); }
+#view-console .type-tag.choice { background: color-mix(in oklch, var(--choice) 22%, transparent); color: var(--choice); }
+#view-console .type-tag.score { background: color-mix(in oklch, var(--score) 22%, transparent); color: var(--score); }
+#view-console .row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+#view-console .row input { flex: 1 1 auto; }
+#view-console .row .key-input { flex: 0 0 34%; }
+#view-console .row .idx {
     flex: 0 0 auto;
     width: 20px; height: 20px;
     border-radius: 50%;
@@ -240,34 +265,31 @@
     font-weight: 700;
     display: flex; align-items: center; justify-content: center;
   }
-  .add-row-btn { margin-top: 4px; }
-
-  .add-q-btn { width: 100%; margin-top: 4px; }
-
-  .run-bar {
+#view-console .add-row-btn { margin-top: 4px; }
+#view-console .add-q-btn { width: 100%; margin-top: 4px; }
+#view-console .run-bar {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-top: 16px;
   }
-  .run-bar button.primary { flex: 1 1 auto; padding: 11px 16px; font-size: 0.92rem; }
-
-  details.raw {
+#view-console .run-bar button.primary { flex: 1 1 auto; padding: 11px 16px; font-size: 0.92rem; }
+#view-console details.raw {
     margin-top: 14px;
     border-top: 1px dashed var(--border);
     padding-top: 10px;
   }
-  details.raw summary {
+#view-console details.raw summary {
     cursor: pointer;
     font-size: 0.78rem;
     color: var(--text-muted);
     font-weight: 600;
     list-style: none;
   }
-  details.raw summary::-webkit-details-marker { display: none; }
-  details.raw summary::before { content: "▸ "; }
-  details.raw[open] summary::before { content: "▾ "; }
-  pre.code {
+#view-console details.raw summary::-webkit-details-marker { display: none; }
+#view-console details.raw summary::before { content: "▸ "; }
+#view-console details.raw[open] summary::before { content: "▾ "; }
+#view-console pre.code {
     margin: 8px 0 0;
     background: var(--bg-2);
     border: 1px solid var(--border);
@@ -278,9 +300,38 @@
     white-space: pre;
     color: var(--text);
   }
-
-  /* --- response panel states --- */
-  .resp-empty {
+#view-console textarea.raw-editor {
+    display: block;
+    width: 100%;
+    margin: 8px 0 0;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font: 12px/1.55 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--text);
+    resize: vertical;
+    min-height: 160px;
+    white-space: pre;
+    tab-size: 2;
+  }
+#view-console textarea.raw-editor:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
+  }
+#view-console .dirty-badge {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--score) 22%, transparent);
+    color: var(--score);
+    vertical-align: middle;
+  }
+#view-console .resp-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -290,11 +341,10 @@
     color: var(--text-faint);
     gap: 10px;
   }
-  .resp-empty svg { opacity: 0.55; }
-  .resp-empty p { margin: 0; font-size: 0.85rem; }
-
-  .resp-loading { padding: 4px 0; }
-  .skeleton {
+#view-console .resp-empty svg { opacity: 0.55; }
+#view-console .resp-empty p { margin: 0; font-size: 0.85rem; }
+#view-console .resp-loading { padding: 4px 0; }
+#view-console .skeleton {
     height: 14px;
     border-radius: 6px;
     background: linear-gradient(90deg, var(--bg-2) 25%, var(--border) 37%, var(--bg-2) 63%);
@@ -302,12 +352,9 @@
     animation: shimmer 1.4s ease-in-out infinite;
     margin-bottom: 10px;
   }
-  @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton { animation: none; opacity: 0.6; }
-  }
-
-  .resp-error {
+@keyframes shimmer {0% { background-position: 100% 50%; } 100% { background-position: 0 50%; }}
+@media (prefers-reduced-motion: reduce) {#view-console .skeleton { animation: none; opacity: 0.6; }}
+#view-console .resp-error {
     background: var(--danger-soft);
     border: 1px solid color-mix(in oklch, var(--danger) 40%, var(--border));
     color: var(--danger);
@@ -316,43 +363,39 @@
     font-size: 0.85rem;
     line-height: 1.55;
   }
-  .resp-error strong { display: block; margin-bottom: 3px; }
-
-  .ans-card {
+#view-console .resp-error strong { display: block; margin-bottom: 3px; }
+#view-console .ans-card {
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 12px 13px;
     margin-bottom: 10px;
     background: var(--surface-solid);
   }
-  .ans-card:last-child { margin-bottom: 0; }
-  .ans-head {
+#view-console .ans-card:last-child { margin-bottom: 0; }
+#view-console .ans-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
   }
-  .ans-name { font-weight: 700; font-size: 0.88rem; }
-  .ans-conf { font-size: 0.72rem; color: var(--text-faint); }
-
-  .bar-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-  .bar-label { flex: 0 0 34%; font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bar-track { flex: 1 1 auto; height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 999px; transition: width 420ms cubic-bezier(0.16, 1, 0.3, 1); }
-  .bar-fill.noul { background: var(--noul); }
-  .bar-fill.choice { background: var(--choice); }
-  .bar-fill.choice.chosen { background: var(--choice); }
-  .bar-fill.score { background: var(--score); }
-  .bar-pct { flex: 0 0 3.4em; text-align: right; font-size: 0.76rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
-
-  .choice-chosen-label {
+#view-console .ans-name { font-weight: 700; font-size: 0.88rem; }
+#view-console .ans-conf { font-size: 0.72rem; color: var(--text-faint); }
+#view-console .bar-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+#view-console .bar-label { flex: 0 0 34%; font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#view-console .bar-track { flex: 1 1 auto; height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+#view-console .bar-fill { height: 100%; border-radius: 999px; transition: width 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+#view-console .bar-fill.noul { background: var(--noul); }
+#view-console .bar-fill.choice { background: var(--choice); }
+#view-console .bar-fill.choice.chosen { background: var(--choice); }
+#view-console .bar-fill.score { background: var(--score); }
+#view-console .bar-pct { flex: 0 0 3.4em; text-align: right; font-size: 0.76rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+#view-console .choice-chosen-label {
     font-size: 0.8rem;
     margin-bottom: 6px;
     color: var(--text);
   }
-  .choice-chosen-label b { color: var(--choice); }
-
-  .score-scale {
+#view-console .choice-chosen-label b { color: var(--choice); }
+#view-console .score-scale {
     display: flex;
     justify-content: space-between;
     font-size: 0.68rem;
@@ -360,14 +403,13 @@
     margin-top: 6px;
     gap: 6px;
   }
-  .score-scale span { flex: 1 1 0; text-align: center; }
-  .score-value {
+#view-console .score-scale span { flex: 1 1 0; text-align: center; }
+#view-console .score-value {
     font-size: 0.8rem;
     margin-bottom: 6px;
     color: var(--text);
   }
-
-  .usage-line {
+#view-console .usage-line {
     margin-top: 12px;
     font-size: 0.74rem;
     color: var(--text-faint);
@@ -375,22 +417,961 @@
     gap: 14px;
     flex-wrap: wrap;
   }
-
-  .footnote {
+#view-console .footnote {
     margin-top: 22px;
     font-size: 0.76rem;
     color: var(--text-faint);
     line-height: 1.6;
   }
-  .footnote code {
+#view-console .footnote code {
     background: var(--bg-2);
     padding: 1px 5px;
     border-radius: 5px;
     font-size: 0.92em;
   }
+
+#view-magi {
+    --bg: oklch(12% 0.01 80);
+    --bg-2: oklch(16% 0.015 80);
+    --panel: oklch(18% 0.02 80);
+    --panel-line: oklch(30% 0.03 80);
+    --amber: oklch(78% 0.16 80);
+    --amber-dim: oklch(55% 0.12 80);
+    --amber-glow: oklch(78% 0.16 80 / 0.35);
+    --green: oklch(72% 0.17 150);
+    --green-glow: oklch(72% 0.17 150 / 0.35);
+    --red: oklch(62% 0.20 25);
+    --red-glow: oklch(62% 0.20 25 / 0.35);
+    --text: oklch(88% 0.02 80);
+    --text-dim: oklch(60% 0.02 80);
+  }
+#view-magi * { box-sizing: border-box; }
+body.mode-magi { margin: 0; padding: 0; }
+body.mode-magi {
+    min-height: 100vh;
+    background:
+      repeating-linear-gradient(0deg, oklch(0% 0 0 / 0.12) 0px, oklch(0% 0 0 / 0.12) 1px, transparent 1px, transparent 3px),
+      radial-gradient(1000px 500px at 50% -10%, var(--bg-2), var(--bg));
+    color: var(--text);
+    font: 400 15px/1.6 ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 40px) clamp(14px, 4vw, 28px) 64px;
+  }
+@media (prefers-reduced-motion: no-preference) {body.mode-magi { animation: flicker 6s infinite; }}
+@keyframes flicker {0%, 96%, 100% { opacity: 1; } 97% { opacity: 0.985; } 98% { opacity: 1; } 99% { opacity: 0.99; }}
+#view-magi .wrap { max-width: 980px; margin: 0 auto; }
+#view-magi header {
+    text-align: center;
+    margin-bottom: 26px;
+  }
+#view-magi header h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    letter-spacing: 0.18em;
+    color: var(--amber);
+    text-shadow: 0 0 14px var(--amber-glow);
+    font-weight: 700;
+  }
+#view-magi header p {
+    margin: 8px 0 0;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+#view-magi header .status-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 0.72rem;
+    color: var(--amber-dim);
+    letter-spacing: 0.06em;
+  }
+#view-magi header .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber-glow);
+  }
+@media (prefers-reduced-motion: no-preference) {#view-magi header .status-dot { animation: pulse 1.8s ease-in-out infinite; }}
+@keyframes pulse {0%,100% { opacity: 1; } 50% { opacity: 0.35; }}
+#view-magi .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 4px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+#view-magi .panel-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--amber-dim);
+    margin: 0 0 10px;
+    text-transform: uppercase;
+  }
+#view-magi textarea {
+    width: 100%;
+    background: oklch(9% 0.01 80);
+    border: 1px solid var(--panel-line);
+    color: var(--text);
+    font: inherit;
+    padding: 10px 12px;
+    border-radius: 3px;
+    resize: vertical;
+    min-height: 72px;
+    outline: none;
+  }
+#view-magi textarea:focus-visible {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 2px var(--amber-glow);
+  }
+#view-magi textarea::placeholder { color: var(--text-dim); }
+#view-magi button {
+    font: inherit;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--amber-dim);
+    color: var(--amber);
+    padding: 10px 20px;
+    border-radius: 3px;
+    transition: transform 90ms ease-out, background 150ms ease, box-shadow 150ms ease;
+    margin-top: 12px;
+  }
+#view-magi button:hover { background: oklch(78% 0.16 80 / 0.08); box-shadow: 0 0 12px var(--amber-glow); }
+#view-magi button:active { transform: scale(0.97); }
+#view-magi button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+#view-magi button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+#view-magi .nodes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+@media (max-width: 640px) {#view-magi .nodes { grid-template-columns: 1fr; }}
+#view-magi .node {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+    padding: 20px 16px 18px;
+    text-align: center;
+    transition: border-color 300ms ease, box-shadow 300ms ease;
+    opacity: 0.35;
+  }
+#view-magi .node.active { opacity: 1; }
+#view-magi .node.pending .node-status { color: var(--text-dim); }
+#view-magi .node.thinking { border-color: var(--amber-dim); box-shadow: 0 0 16px var(--amber-glow) inset; }
+#view-magi .node.thinking .node-status { color: var(--amber); }
+#view-magi .node.agree { border-color: var(--green); box-shadow: 0 0 20px var(--green-glow) inset; }
+#view-magi .node.agree .node-status { color: var(--green); }
+#view-magi .node.disagree { border-color: var(--red); box-shadow: 0 0 20px var(--red-glow) inset; }
+#view-magi .node.disagree .node-status { color: var(--red); }
+#view-magi .node-id { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.1em; margin-bottom: 4px; }
+#view-magi .node-name { font-size: 1rem; letter-spacing: 0.1em; color: var(--amber); font-weight: 700; margin-bottom: 10px; }
+#view-magi .node-role { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
+#view-magi .node-status { font-size: 0.85rem; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 8px; min-height: 1.2em; }
+#view-magi .node-bar-track { height: 5px; background: oklch(9% 0.01 80); border-radius: 3px; overflow: hidden; }
+#view-magi .node-bar-fill { height: 100%; width: 0%; background: var(--amber-dim); transition: width 500ms cubic-bezier(0.16,1,0.3,1), background 300ms ease; }
+#view-magi .node.agree .node-bar-fill { background: var(--green); }
+#view-magi .node.disagree .node-bar-fill { background: var(--red); }
+#view-magi .node-pct { font-size: 0.68rem; color: var(--text-dim); margin-top: 4px; }
+#view-magi .verdict {
+    text-align: center;
+    padding: 26px 16px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 400ms ease, transform 400ms ease;
+  }
+#view-magi .verdict.show { opacity: 1; transform: translateY(0); }
+#view-magi .verdict-tally { font-size: 0.75rem; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 8px; }
+#view-magi .verdict-word {
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
+    letter-spacing: 0.2em;
+    font-weight: 700;
+  }
+#view-magi .verdict.pass .verdict-word { color: var(--green); text-shadow: 0 0 20px var(--green-glow); }
+#view-magi .verdict.fail .verdict-word { color: var(--red); text-shadow: 0 0 20px var(--red-glow); }
+#view-magi .error-box {
+    border: 1px solid var(--red);
+    color: var(--red);
+    background: oklch(20% 0.03 25);
+    padding: 12px 14px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+#view-magi details.raw { margin-top: 6px; }
+#view-magi details.raw summary {
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+#view-magi pre.code {
+    margin: 8px 0 0;
+    background: oklch(9% 0.01 80);
+    border: 1px solid var(--panel-line);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-x: auto;
+    color: var(--text-dim);
+  }
+
+#view-tetris {
+    --bg: oklch(14% 0.03 285);
+    --bg-2: oklch(19% 0.04 285);
+    --panel: oklch(20% 0.03 285 / 0.85);
+    --panel-line: oklch(38% 0.06 285);
+    --text: oklch(92% 0.02 285);
+    --text-dim: oklch(65% 0.03 285);
+    --accent: oklch(78% 0.19 320);
+    --accent-glow: oklch(78% 0.19 320 / 0.4);
+    --cyan: oklch(80% 0.15 200);
+    --green: oklch(75% 0.17 150);
+    --red: oklch(65% 0.20 25);
+    --yellow: oklch(85% 0.16 95);
+  }
+#view-tetris * { box-sizing: border-box; }
+body.mode-tetris { margin: 0; padding: 0; }
+body.mode-tetris {
+    min-height: 100vh;
+    background: radial-gradient(900px 500px at 50% -10%, var(--bg-2), var(--bg));
+    color: var(--text);
+    font: 400 15px/1.5 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 32px) clamp(14px, 4vw, 24px) 64px;
+  }
+#view-tetris .wrap { max-width: 780px; margin: 0 auto; }
+#view-tetris header { text-align: center; margin-bottom: 20px; }
+#view-tetris header h1 {
+    margin: 0;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    letter-spacing: 0.14em;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+#view-tetris header p { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); letter-spacing: 0.02em; }
+#view-tetris .layout {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: start;
+    justify-content: center;
+  }
+@media (max-width: 620px) {#view-tetris .layout { grid-template-columns: 1fr; justify-items: center; }}
+#view-tetris .board-frame {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 0 30px oklch(0% 0 0 / 0.4);
+  }
+#view-tetris canvas#board {
+    display: block;
+    border-radius: 6px;
+    background: oklch(10% 0.02 285);
+  }
+#view-tetris .side { display: flex; flex-direction: column; gap: 14px; min-width: 220px; width: 100%; max-width: 320px; }
+#view-tetris .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+#view-tetris .panel h2 {
+    margin: 0 0 10px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+#view-tetris .stat-row { display: flex; justify-content: space-between; font-size: 0.86rem; padding: 3px 0; }
+#view-tetris .stat-row span:last-child { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+#view-tetris .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+#view-tetris button {
+    font: 700 0.82rem/1.4 inherit;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    border: 1px solid var(--panel-line);
+    background: oklch(100% 0 0 / 0.04);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 8px;
+    transition: transform 90ms ease-out, background 150ms ease, box-shadow 150ms ease;
+  }
+#view-tetris button:hover { background: oklch(100% 0 0 / 0.09); }
+#view-tetris button:active { transform: scale(0.96); }
+#view-tetris button:disabled { opacity: 0.4; cursor: not-allowed; }
+#view-tetris button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#view-tetris button.primary { background: var(--accent); color: oklch(15% 0.02 285); border-color: transparent; box-shadow: 0 0 16px var(--accent-glow); }
+#view-tetris button.primary:hover { filter: brightness(1.08); }
+#view-tetris label.check {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 0.8rem; color: var(--text-dim); cursor: pointer;
+  }
+#view-tetris .thinking-line {
+    font-size: 0.78rem;
+    color: var(--cyan);
+    min-height: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+#view-tetris .thinking-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cyan);
+  }
+@media (prefers-reduced-motion: no-preference) {#view-tetris .thinking-dot.active { animation: blink 1s ease-in-out infinite; }}
+@keyframes blink {0%,100% { opacity: 1; } 50% { opacity: 0.25; }}
+#view-tetris .last-move { font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
+#view-tetris .last-move b { color: var(--text); }
+
+#view-tetris .raw-details { margin-top: 8px; }
+#view-tetris .raw-details:first-of-type { margin-top: 0; }
+#view-tetris .raw-details summary {
+    cursor: pointer;
+    font-size: 0.74rem;
+    color: var(--cyan);
+    letter-spacing: 0.03em;
+  }
+#view-tetris .code-log {
+    margin: 6px 0 0;
+    max-height: 220px;
+    overflow: auto;
+    background: oklch(9% 0.01 285);
+    border: 1px solid var(--panel-line);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font: 11px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+#view-tetris .error-box {
+    border: 1px solid var(--red);
+    color: var(--red);
+    background: oklch(22% 0.05 25);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+#view-tetris .gameover-banner {
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--red);
+    padding: 8px 0 2px;
+  }
+
+#view-mail {
+    --bg: oklch(97% 0.004 250);
+    --surface: oklch(100% 0 0);
+    --border: oklch(90% 0.006 250);
+    --border-strong: oklch(80% 0.008 250);
+    --text: oklch(22% 0.01 260);
+    --text-dim: oklch(50% 0.012 260);
+    --text-faint: oklch(65% 0.01 260);
+    --accent: oklch(55% 0.18 258);
+    --accent-soft: oklch(93% 0.03 258);
+
+    --c-work: oklch(52% 0.16 258);
+    --c-work-bg: oklch(94% 0.03 258);
+    --c-billing: oklch(62% 0.15 60);
+    --c-billing-bg: oklch(94% 0.05 70);
+    --c-notification: oklch(60% 0.11 195);
+    --c-notification-bg: oklch(93% 0.03 195);
+    --c-spam: oklch(55% 0.20 25);
+    --c-spam-bg: oklch(94% 0.05 25);
+    --c-personal: oklch(60% 0.14 145);
+    --c-personal-bg: oklch(94% 0.04 145);
+    --c-pending-bg: oklch(94% 0 0);
+    --c-pending-text: oklch(55% 0 0);
+  }
+@media (prefers-color-scheme: dark) {#view-mail {
+      --bg: oklch(17% 0.01 260);
+      --surface: oklch(21% 0.012 260);
+      --border: oklch(32% 0.014 260);
+      --border-strong: oklch(42% 0.016 260);
+      --text: oklch(93% 0.006 260);
+      --text-dim: oklch(72% 0.01 260);
+      --text-faint: oklch(56% 0.01 260);
+      --accent: oklch(72% 0.15 258);
+      --accent-soft: oklch(32% 0.05 258);
+      --c-pending-bg: oklch(30% 0 0);
+      --c-pending-text: oklch(70% 0 0);
+    }}
+#view-mail * { box-sizing: border-box; }
+body.mode-mail { margin: 0; padding: 0; }
+body.mode-mail {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 15px/1.5 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 32px) clamp(14px, 4vw, 24px) 64px;
+  }
+#view-mail .wrap { max-width: 760px; margin: 0 auto; }
+#view-mail header { margin-bottom: 18px; }
+#view-mail header h1 { margin: 0; font-size: clamp(1.3rem, 4vw, 1.7rem); font-weight: 800; letter-spacing: -0.01em; }
+#view-mail header p { margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim); }
+#view-mail .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+#view-mail button {
+    font: 700 0.84rem/1.4 inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 8px;
+    transition: transform 90ms ease-out, background 150ms ease, box-shadow 150ms ease;
+  }
+#view-mail button:hover { background: var(--accent-soft); }
+#view-mail button:active { transform: scale(0.96); }
+#view-mail button:disabled { opacity: 0.45; cursor: not-allowed; }
+#view-mail button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#view-mail button.primary { background: var(--accent); color: white; border-color: transparent; }
+#view-mail button.primary:hover { filter: brightness(1.06); }
+#view-mail button.chip {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+  }
+#view-mail button.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+#view-mail .progress-line { flex: 1 1 160px; min-width: 120px; }
+#view-mail .progress-track {
+    height: 6px; border-radius: 999px; background: var(--border); overflow: hidden;
+  }
+#view-mail .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 300ms ease; }
+#view-mail .progress-text { font-size: 0.72rem; color: var(--text-faint); margin-top: 4px; }
+#view-mail .summary {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+#view-mail .error-box {
+    border: 1px solid var(--c-spam);
+    color: var(--c-spam);
+    background: var(--c-spam-bg);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+  }
+#view-mail .mail-list {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+#view-mail .mail-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 350ms ease, transform 350ms ease, background 200ms ease;
+  }
+#view-mail .mail-row.in { opacity: 1; transform: translateY(0); }
+#view-mail .mail-row:last-child { border-bottom: none; }
+#view-mail .mail-row.hidden-by-filter { display: none; }
+#view-mail .mail-row.thinking { background: var(--accent-soft); }
+#view-mail .mail-tag {
+    flex: 0 0 auto;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: var(--c-pending-bg);
+    color: var(--c-pending-text);
+  }
+#view-mail .mail-tag.work { background: var(--c-work-bg); color: var(--c-work); }
+#view-mail .mail-tag.billing { background: var(--c-billing-bg); color: var(--c-billing); }
+#view-mail .mail-tag.notification { background: var(--c-notification-bg); color: var(--c-notification); }
+#view-mail .mail-tag.spam { background: var(--c-spam-bg); color: var(--c-spam); }
+#view-mail .mail-tag.personal { background: var(--c-personal-bg); color: var(--c-personal); }
+#view-mail .mail-body { flex: 1 1 auto; min-width: 0; }
+#view-mail .mail-from { font-size: 0.78rem; color: var(--text-dim); }
+#view-mail .mail-subject { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view-mail .mail-snippet { font-size: 0.78rem; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+#view-ime {
+    --bg: oklch(96% 0.02 145);
+    --bg-2: oklch(93% 0.03 300);
+    --surface: oklch(99% 0.005 145);
+    --border: oklch(88% 0.02 145);
+    --text: oklch(28% 0.02 260);
+    --text-dim: oklch(50% 0.02 260);
+    --text-faint: oklch(64% 0.015 260);
+    --accent: oklch(62% 0.15 175);
+    --accent-2: oklch(68% 0.14 320);
+    --accent-soft: oklch(92% 0.05 175);
+    --ai-badge: oklch(60% 0.16 320);
+    --ai-badge-bg: oklch(93% 0.05 320);
+    --bubble-bg: oklch(99% 0.005 145);
+  }
+@media (prefers-color-scheme: dark) {#view-ime {
+      --bg: oklch(20% 0.02 260);
+      --bg-2: oklch(24% 0.03 280);
+      --surface: oklch(26% 0.015 260);
+      --border: oklch(36% 0.02 260);
+      --text: oklch(93% 0.006 260);
+      --text-dim: oklch(74% 0.01 260);
+      --text-faint: oklch(58% 0.01 260);
+      --accent: oklch(74% 0.13 175);
+      --accent-2: oklch(76% 0.12 320);
+      --accent-soft: oklch(34% 0.05 175);
+      --ai-badge: oklch(76% 0.13 320);
+      --ai-badge-bg: oklch(33% 0.06 320);
+      --bubble-bg: oklch(26% 0.015 260);
+    }}
+#view-ime * { box-sizing: border-box; }
+body.mode-ime { margin: 0; padding: 0; }
+body.mode-ime {
+    min-height: 100vh;
+    background: radial-gradient(1000px 500px at 15% -10%, var(--bg-2), var(--bg));
+    color: var(--text);
+    font: 400 15px/1.6 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 32px) clamp(14px, 4vw, 24px) 64px;
+  }
+#view-ime .wrap { max-width: 700px; margin: 0 auto; }
+#view-ime header { margin-bottom: 16px; }
+#view-ime header h1 { margin: 0; font-size: clamp(1.3rem, 4vw, 1.7rem); font-weight: 800; letter-spacing: -0.01em; }
+#view-ime header p { margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim); }
+#view-ime .examples { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+#view-ime .examples button {
+    font: 600 0.75rem/1.4 inherit;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+#view-ime .examples button:hover { background: var(--accent-soft); color: var(--text); }
+#view-ime .composer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+#view-ime .composer input[type="text"] {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    padding: 6px 2px;
+  }
+#view-ime .preview {
+    font-size: 0.88rem;
+    color: var(--accent);
+    min-height: 1.4em;
+    padding: 2px 2px 8px;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 8px;
+  }
+#view-ime .composer-actions { display: flex; justify-content: flex-end; gap: 8px; }
+#view-ime button.primary {
+    font: 700 0.85rem/1.4 inherit;
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    transition: transform 90ms ease-out, filter 150ms ease;
+  }
+#view-ime button.primary:hover { filter: brightness(1.07); }
+#view-ime button.primary:active { transform: scale(0.96); }
+#view-ime button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+#view-ime button.ghost {
+    font: 600 0.8rem/1.4 inherit;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+#view-ime button.ghost:hover { background: var(--accent-soft); }
+#view-ime button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#view-ime .status-line {
+    font-size: 0.76rem;
+    color: var(--text-faint);
+    min-height: 1.2em;
+    margin: -6px 0 12px 2px;
+  }
+#view-ime .error-box {
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    background: var(--ai-badge-bg);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+  }
+#view-ime .transcript { display: flex; flex-direction: column; gap: 10px; }
+#view-ime .bubble {
+    background: var(--bubble-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    line-height: 1.9;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 350ms ease, transform 350ms ease;
+  }
+#view-ime .bubble.in { opacity: 1; transform: translateY(0); }
+#view-ime .bubble .romaji-src { display: block; font-size: 0.7rem; color: var(--text-faint); margin-bottom: 4px; }
+#view-ime .ai-word {
+    position: relative;
+    background: var(--ai-badge-bg);
+    color: var(--ai-badge);
+    border-radius: 5px;
+    padding: 0 3px;
+    cursor: help;
+    font-weight: 700;
+  }
+#view-ime .ai-word::after {
+    content: "AI";
+    position: relative;
+    top: -0.6em;
+    font-size: 0.55em;
+    margin-left: 1px;
+    font-weight: 800;
+  }
+#view-ime .empty-hint {
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.82rem;
+    padding: 30px 10px;
+  }
+
+#view-runner {
+    --sky-top: oklch(78% 0.10 240);
+    --sky-bottom: oklch(88% 0.07 200);
+    --ground: oklch(55% 0.10 140);
+    --ground-dark: oklch(42% 0.09 140);
+    --panel: oklch(99% 0.003 100);
+    --border: oklch(85% 0.01 100);
+    --text: oklch(22% 0.01 100);
+    --text-dim: oklch(48% 0.01 100);
+    --accent: oklch(60% 0.18 30);
+    --accent-soft: oklch(93% 0.05 30);
+    --gold: oklch(80% 0.15 90);
+    --danger: oklch(55% 0.20 25);
+    --danger-soft: oklch(93% 0.06 25);
+    --success: oklch(58% 0.15 150);
+    --success-soft: oklch(93% 0.05 150);
+  }
+@media (prefers-color-scheme: dark) {#view-runner {
+      --panel: oklch(22% 0.012 100);
+      --border: oklch(34% 0.014 100);
+      --text: oklch(92% 0.006 100);
+      --text-dim: oklch(70% 0.01 100);
+      --accent-soft: oklch(30% 0.06 30);
+      --danger-soft: oklch(28% 0.07 25);
+      --success-soft: oklch(28% 0.06 150);
+    }}
+#view-runner * { box-sizing: border-box; }
+body.mode-runner { margin: 0; padding: 0; }
+body.mode-runner {
+    min-height: 100vh;
+    background: var(--panel);
+    color: var(--text);
+    font: 400 15px/1.5 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 32px) clamp(14px, 4vw, 24px) 64px;
+  }
+#view-runner .wrap { max-width: 760px; margin: 0 auto; }
+#view-runner header { text-align: center; margin-bottom: 14px; }
+#view-runner header h1 { margin: 0; font-size: clamp(1.3rem, 4vw, 1.7rem); font-weight: 800; letter-spacing: -0.01em; }
+#view-runner header p { margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim); }
+#view-runner .stage-frame {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px oklch(0% 0 0 / 0.12);
+    margin-bottom: 14px;
+  }
+#view-runner canvas#stage { display: block; width: 100%; height: auto; background: var(--sky-bottom); }
+#view-runner .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+#view-runner button {
+    font: 700 0.84rem/1.4 inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 8px;
+    transition: transform 90ms ease-out, background 150ms ease;
+  }
+#view-runner button:hover { background: var(--accent-soft); }
+#view-runner button:active { transform: scale(0.96); }
+#view-runner button:disabled { opacity: 0.45; cursor: not-allowed; }
+#view-runner button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#view-runner button.primary { background: var(--accent); color: white; border-color: transparent; }
+#view-runner button.primary:hover { filter: brightness(1.06); }
+#view-runner .status-banner {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+#view-runner .status-banner.thinking { background: var(--accent-soft); color: var(--accent); }
+#view-runner .status-banner.clear { background: var(--success-soft); color: var(--success); }
+#view-runner .status-banner.dead { background: var(--danger-soft); color: var(--danger); }
+#view-runner .error-box {
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    background: var(--danger-soft);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+  }
+#view-runner .log {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+#view-runner .log-chip {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-dim);
+    opacity: 0.4;
+  }
+#view-runner .log-chip.current { opacity: 1; background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+#view-runner .log-chip.ok { opacity: 1; background: var(--success-soft); color: var(--success); border-color: transparent; }
+#view-runner .log-chip.fail { opacity: 1; background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+
+#view-persuade {
+    --bg: oklch(94% 0.02 75);
+    --bg-2: oklch(90% 0.03 60);
+    --panel: oklch(98% 0.008 75);
+    --border: oklch(83% 0.02 60);
+    --text: oklch(24% 0.02 40);
+    --text-dim: oklch(46% 0.02 40);
+    --text-faint: oklch(60% 0.015 40);
+    --accent: oklch(42% 0.13 30);
+    --accent-soft: oklch(90% 0.05 40);
+    --meter-low: oklch(58% 0.19 25);
+    --meter-mid: oklch(75% 0.15 75);
+    --meter-high: oklch(62% 0.15 150);
+    --win-bg: oklch(90% 0.06 150);
+    --win-text: oklch(40% 0.13 150);
+  }
+@media (prefers-color-scheme: dark) {#view-persuade {
+      --bg: oklch(18% 0.015 40);
+      --bg-2: oklch(23% 0.02 40);
+      --panel: oklch(23% 0.015 40);
+      --border: oklch(34% 0.02 40);
+      --text: oklch(92% 0.01 60);
+      --text-dim: oklch(70% 0.015 50);
+      --text-faint: oklch(55% 0.012 50);
+      --accent: oklch(75% 0.10 50);
+      --accent-soft: oklch(32% 0.05 40);
+      --win-bg: oklch(28% 0.06 150);
+      --win-text: oklch(78% 0.13 150);
+    }}
+#view-persuade * { box-sizing: border-box; }
+body.mode-persuade { margin: 0; padding: 0; }
+body.mode-persuade {
+    min-height: 100vh;
+    background: radial-gradient(1000px 500px at 50% -10%, var(--bg-2), var(--bg));
+    color: var(--text);
+    font: 400 15px/1.6 Georgia, "Hiragino Mincho ProN", "Yu Mincho", serif;
+    padding: clamp(16px, 4vw, 32px) clamp(14px, 4vw, 24px) 64px;
+  }
+#view-persuade .wrap { max-width: 700px; margin: 0 auto; }
+#view-persuade header { text-align: center; margin-bottom: 16px; }
+#view-persuade header h1 {
+    margin: 0;
+    font-size: clamp(1.4rem, 4.5vw, 1.9rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+#view-persuade header p { margin: 5px 0 0; font-size: 0.82rem; color: var(--text-dim); font-family: -apple-system, sans-serif; }
+#view-persuade .stats-line {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    margin-bottom: 14px;
+    font-family: -apple-system, sans-serif;
+  }
+#view-persuade .claim-list { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; justify-content: center; }
+#view-persuade .claim-chip {
+    font: 600 0.76rem/1.4 -apple-system, sans-serif;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+#view-persuade .claim-chip:hover { background: var(--accent-soft); }
+#view-persuade .claim-chip[aria-pressed="true"] { background: var(--accent); color: var(--panel); border-color: transparent; }
+#view-persuade .claim-chip.won::after { content: " ✓"; }
+#view-persuade .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+#view-persuade .claim-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+#view-persuade .meter-wrap { margin-bottom: 6px; }
+#view-persuade .meter-track {
+    height: 16px;
+    border-radius: 999px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+#view-persuade .meter-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--meter-low), var(--meter-mid) 60%, var(--meter-high));
+    transition: width 700ms cubic-bezier(0.16,1,0.3,1);
+  }
+#view-persuade .meter-threshold {
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 2px;
+    background: var(--text);
+    opacity: 0.5;
+    left: 70%;
+  }
+#view-persuade .meter-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    margin-top: 4px;
+    font-family: -apple-system, sans-serif;
+  }
+#view-persuade .meter-pct { font-size: 1.4rem; font-weight: 800; text-align: center; margin-bottom: 4px; font-family: -apple-system, sans-serif; }
+#view-persuade .meter-delta { font-size: 0.8rem; text-align: center; margin-bottom: 10px; font-family: -apple-system, sans-serif; min-height: 1.2em; }
+#view-persuade .meter-delta.up { color: var(--meter-high); }
+#view-persuade .meter-delta.down { color: var(--meter-low); }
+#view-persuade textarea {
+    width: 100%;
+    font: 400 0.95rem/1.6 -apple-system, "Hiragino Sans", sans-serif;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+  }
+#view-persuade textarea:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+#view-persuade .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+#view-persuade button {
+    font: 700 0.85rem/1.4 -apple-system, sans-serif;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 90ms ease-out, background 150ms ease;
+  }
+#view-persuade button:hover { background: var(--accent-soft); }
+#view-persuade button:active { transform: scale(0.96); }
+#view-persuade button:disabled { opacity: 0.45; cursor: not-allowed; }
+#view-persuade button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#view-persuade button.primary { background: var(--accent); color: var(--panel); border-color: transparent; }
+#view-persuade button.primary:hover { filter: brightness(1.1); }
+#view-persuade .win-banner {
+    text-align: center;
+    background: var(--win-bg);
+    color: var(--win-text);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 700;
+    font-family: -apple-system, sans-serif;
+    margin-bottom: 14px;
+  }
+#view-persuade .error-box {
+    border: 1px solid var(--meter-low);
+    color: var(--meter-low);
+    background: var(--accent-soft);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-family: -apple-system, sans-serif;
+    margin-bottom: 14px;
+  }
+#view-persuade .history { display: flex; flex-direction: column; gap: 6px; }
+#view-persuade .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-family: -apple-system, sans-serif;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+#view-persuade .history-item .arg-text { color: var(--text-dim); flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
+#view-persuade .history-item .pct { font-weight: 800; flex: 0 0 auto; }
+
 </style>
 </head>
-<body>
+<body class="mode-console">
+
+<div class="mode-switch">
+  <button id="tab-console" type="button" aria-pressed="true">Jev Console</button>
+  <button id="tab-magi" type="button" aria-pressed="false">MAGI SYSTEM</button>
+  <button id="tab-tetris" type="button" aria-pressed="false">JEV TETRIS</button>
+  <button id="tab-mail" type="button" aria-pressed="false">MAIL SORT</button>
+  <button id="tab-ime" type="button" aria-pressed="false">ROMAJI IME</button>
+  <button id="tab-runner" type="button" aria-pressed="false">PIXEL RUNNER</button>
+  <button id="tab-persuade" type="button" aria-pressed="false">PERSUADE JEV</button>
+</div>
+
+<div class="view" id="view-console">
 <div class="wrap">
 
   <header class="top">
@@ -428,9 +1409,13 @@
           <button class="primary" id="runBtn">実行</button>
         </div>
 
-        <details class="raw">
-          <summary>送信するリクエストを見る</summary>
-          <pre class="code" id="reqPreview">{}</pre>
+        <details class="raw" open>
+          <summary>
+            送信するリクエスト(直接編集できます)
+            <span id="reqDirtyBadge" class="dirty-badge" hidden>手動編集中</span>
+          </summary>
+          <textarea class="code raw-editor" id="reqPreview" spellcheck="false" autocomplete="off"></textarea>
+          <button type="button" class="ghost sm" id="regenReqBtn" style="margin-top:6px;">フォームから再生成</button>
         </details>
       </div>
     </div>
@@ -454,13 +1439,254 @@
   </div>
 
   <p class="footnote">
-    このページ自体が Cloudflare Worker から配信されており、同じ Worker に <code>POST</code> で
-    <code>{ state, questions }</code> を送って <code>env.AI.run("typesafe/jev", ...)</code> を実行しています。
+    同じ Worker に <code>POST</code> で <code>{ state, questions }</code> を送り、
+    サーバー側で <code>env.AI.run("typesafe/jev", ...)</code> を呼び出しています。
   </p>
 
 </div>
+</div>
+
+<div class="view" id="view-magi" hidden>
+<div class="wrap">
+
+  <header>
+    <h1>M A G I &nbsp;S Y S T E M</h1>
+    <p>三賢者合議制 意思決定コンソール — MELCHIOR / BALTHASAR / CASPER</p>
+    <div class="status-line"><span class="status-dot"></span>STANDBY</div>
+  </header>
+
+  <div class="panel">
+    <p class="panel-title">議題</p>
+    <textarea id="topic" placeholder="例: 新しい機能を今週リリースすべきか？"></textarea>
+    <div>
+      <button id="magiRunBtn">審議開始</button>
+    </div>
+  </div>
+
+  <div id="errorBox"></div>
+
+  <div class="nodes">
+    <div class="node pending" id="node-melchior">
+      <div class="node-id">MELCHIOR-1</div>
+      <div class="node-name">科学者</div>
+      <div class="node-role">実務的・技術的な妥当性を審議</div>
+      <div class="node-status">待機中</div>
+      <div class="node-bar-track"><div class="node-bar-fill"></div></div>
+      <div class="node-pct">&nbsp;</div>
+    </div>
+    <div class="node pending" id="node-balthasar">
+      <div class="node-id">BALTHASAR-2</div>
+      <div class="node-name">母</div>
+      <div class="node-role">リスク・安全性の観点を審議</div>
+      <div class="node-status">待機中</div>
+      <div class="node-bar-track"><div class="node-bar-fill"></div></div>
+      <div class="node-pct">&nbsp;</div>
+    </div>
+    <div class="node pending" id="node-casper">
+      <div class="node-id">CASPER-3</div>
+      <div class="node-name">女</div>
+      <div class="node-role">直感・心情的な納得感を審議</div>
+      <div class="node-status">待機中</div>
+      <div class="node-bar-track"><div class="node-bar-fill"></div></div>
+      <div class="node-pct">&nbsp;</div>
+    </div>
+  </div>
+
+  <div class="panel verdict" id="verdict">
+    <div class="verdict-tally" id="verdictTally">&nbsp;</div>
+    <div class="verdict-word" id="verdictWord">&nbsp;</div>
+    <details class="raw">
+      <summary>Raw JSON</summary>
+      <pre class="code" id="rawJson">{}</pre>
+    </details>
+  </div>
+
+</div>
+</div>
+
+<div class="view" id="view-tetris" hidden>
+<div class="wrap">
+
+  <header>
+    <h1>JEV TETRIS</h1>
+    <p>盤面の候補手をJevに評価させて、1手ずつ自動でプレイするデモ</p>
+  </header>
+
+  <div class="layout">
+    <div class="board-frame">
+      <canvas id="board" width="240" height="480"></canvas>
+    </div>
+
+    <div class="side">
+      <div class="panel">
+        <h2>Status</h2>
+        <div class="stat-row"><span>スコア</span><span id="statScore">0</span></div>
+        <div class="stat-row"><span>ライン</span><span id="statLines">0</span></div>
+        <div class="stat-row"><span>ピース数</span><span id="statPieces">0</span></div>
+        <div class="thinking-line"><span class="thinking-dot" id="thinkingDot"></span><span id="thinkingText">待機中</span></div>
+      </div>
+
+      <div class="panel">
+        <h2>Controls</h2>
+        <div class="controls">
+          <button class="primary" id="startBtn">開始</button>
+          <button id="resetBtn">リセット</button>
+        </div>
+        <label class="check" style="margin-top:10px;">
+          <input type="checkbox" id="skipAnim"> アニメーションを省略(高速再生)
+        </label>
+      </div>
+
+      <div class="panel">
+        <h2>Jevの直前の判断</h2>
+        <div class="last-move" id="lastMove">まだありません</div>
+      </div>
+
+      <div class="panel">
+        <h2>通信ログ(直近のリクエスト/レスポンス)</h2>
+        <details class="raw-details">
+          <summary>送信データ(request)</summary>
+          <pre class="code-log" id="tetrisReqLog">まだありません</pre>
+        </details>
+        <details class="raw-details">
+          <summary>受信データ(response)</summary>
+          <pre class="code-log" id="tetrisResLog">まだありません</pre>
+        </details>
+      </div>
+
+      <div id="tetrisErrorBox"></div>
+      <div class="gameover-banner" id="gameoverBanner" hidden>GAME OVER</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="view" id="view-mail" hidden>
+<div class="wrap">
+
+  <header>
+    <h1>MAIL SORT</h1>
+    <p>50件の受信メールをJevが自動で分類するデモ(10件ずつまとめてJevに判定させています)</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="primary" id="mailStartBtn">仕分け開始</button>
+    <button id="mailResetBtn">リセット</button>
+    <div class="progress-line">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 50 件処理済み</div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div id="mailErrorBox"></div>
+
+  <div class="mail-list" id="mailList"></div>
+
+</div>
+</div>
+
+<div class="view" id="view-ime" hidden>
+<div class="wrap">
+
+  <header>
+    <h1>ROMAJI IME</h1>
+    <p>ローマ字入力→ひらがな変換はその場で、同音異義語の漢字選びだけJevが文脈から判断します</p>
+  </header>
+
+  <div class="examples" id="examples">
+    <button type="button" data-ex="kyou kami wo kirimashita">kyou kami wo kirimashita</button>
+    <button type="button" data-ex="hashi de hana wo mimashita">hashi de hana wo mimashita</button>
+    <button type="button" data-ex="tomodachi ni ashita aimasu">tomodachi ni ashita aimasu</button>
+    <button type="button" data-ex="kono hon wo tori ni ikimasu">kono hon wo tori ni ikimasu</button>
+  </div>
+
+  <div class="composer">
+    <input type="text" id="romajiInput" placeholder="ここにローマ字を入力(例: kyou gakkou de nihongo wo benkyou shimasu)" autocomplete="off" spellcheck="false">
+    <div class="preview" id="preview">&nbsp;</div>
+    <div class="composer-actions">
+      <button class="ghost" id="clearBtn">履歴をクリア</button>
+      <button class="primary" id="convertBtn">変換</button>
+    </div>
+  </div>
+
+  <div class="status-line" id="statusLine">&nbsp;</div>
+  <div id="imeErrorBox"></div>
+
+  <div class="transcript" id="transcript">
+    <div class="empty-hint" id="emptyHint">変換すると、ここに確定した文章が積み重なっていきます。<br>紫色の「AI」マーク付きの単語は、Jevが前後の文脈から漢字を選んだ部分です。</div>
+  </div>
+
+</div>
+</div>
+
+<div class="view" id="view-runner" hidden>
+<div class="wrap">
+
+  <header>
+    <h1>PIXEL RUNNER</h1>
+    <p>各区画の状況をまとめてJevに判断させ、その行動プランどおりに自動で走り抜けるデモ</p>
+  </header>
+
+  <div class="stage-frame">
+    <canvas id="stage" width="760" height="220"></canvas>
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" id="runnerStartBtn">Jevに判断させて開始</button>
+    <button id="newLevelBtn">コースを変える</button>
+  </div>
+
+  <div id="statusBanner" class="status-banner" hidden></div>
+  <div id="runnerErrorBox"></div>
+  <div class="log" id="log"></div>
+
+</div>
+</div>
+
+<div class="view" id="view-persuade" hidden>
+<div class="wrap">
+
+  <header>
+    <h1>Jevを説得せよ</h1>
+    <p>主張に論拠を添えて、Jevの納得度(confidence)を70%まで動かせるか挑戦する</p>
+  </header>
+
+  <div class="stats-line" id="statsLine">まだ挑戦していません</div>
+
+  <div class="claim-list" id="claimList"></div>
+
+  <div class="card">
+    <div class="claim-text" id="claimText">左上のお題を選んでください</div>
+
+    <div id="winBanner"></div>
+
+    <div class="meter-pct" id="meterPct">--%</div>
+    <div class="meter-wrap">
+      <div class="meter-track"><div class="meter-fill" id="meterFill"></div><div class="meter-threshold"></div></div>
+      <div class="meter-label"><span>0%</span><span>説得ライン 70%</span><span>100%</span></div>
+    </div>
+    <div class="meter-delta" id="meterDelta">&nbsp;</div>
+
+    <textarea id="argumentInput" placeholder="ここに説得の論拠を書いてください" spellcheck="false"></textarea>
+    <div class="actions">
+      <button id="baselineBtn">最初の反応を見る</button>
+      <button class="primary" id="persuadeBtn">説得する</button>
+    </div>
+  </div>
+
+  <div id="persuadeErrorBox"></div>
+
+  <div class="card">
+    <div class="history" id="history"></div>
+  </div>
+
+</div>
+</div>
 
 <script>
+
 (() => {
   "use strict";
 
@@ -687,12 +1913,17 @@
       if (!p) return;
       stateInput.value = p.state;
       questions = p.questions.map(q => blankQuestion(q));
+      requestDirty = false;
+      reqDirtyBadge.hidden = true;
       renderQuestions();
     });
   });
 
   // ---------- request building ----------
   const reqPreview = $("#reqPreview");
+  const reqDirtyBadge = $("#reqDirtyBadge");
+  const regenReqBtn = $("#regenReqBtn");
+  let requestDirty = false;
 
   function parseState(raw) {
     const trimmed = raw.trim();
@@ -738,8 +1969,20 @@
   }
 
   function updateRequestPreview() {
-    reqPreview.textContent = JSON.stringify(buildRequestBody(), null, 2);
+    if (requestDirty) return; // 手動編集中はフォームからの自動上書きを止める
+    reqPreview.value = JSON.stringify(buildRequestBody(), null, 2);
   }
+
+  reqPreview.addEventListener("input", () => {
+    requestDirty = true;
+    reqDirtyBadge.hidden = false;
+  });
+
+  regenReqBtn.addEventListener("click", () => {
+    requestDirty = false;
+    reqDirtyBadge.hidden = true;
+    reqPreview.value = JSON.stringify(buildRequestBody(), null, 2);
+  });
 
   // ---------- run ----------
   const runBtn = $("#runBtn");
@@ -837,9 +2080,6 @@
 
   // Workerからの応答は複数の形で返ってくることがあるため、
   // 実際に answers を持つ階層まで自動でたどる。
-  // - env.AI.run() 直接: { model, answers, usage }
-  // - REST API: { result: {...}, success: true, ... }
-  // - AI Gateway 非同期実行: { state: "Completed", result: {...}, gatewayMetadata: {...} }
   function unwrapResult(json) {
     if (json && typeof json === "object") {
       if (json.answers) return json;
@@ -879,16 +2119,22 @@
   }
 
   async function run() {
-    const body = buildRequestBody();
-    if (Object.keys(body.questions).length === 0) {
-      setErrorState("質問を1つ以上追加し、質問名を入力してください。");
+    let body;
+    try {
+      body = JSON.parse(reqPreview.value);
+    } catch (err) {
+      setErrorState("リクエストのJSONが不正です。構文を確認してください。", String(err));
+      return;
+    }
+    if (!body.questions || Object.keys(body.questions).length === 0) {
+      setErrorState("questions が空です。質問を1つ以上追加するか、リクエストを直接編集してください。");
       return;
     }
 
     runBtn.disabled = true;
     setLoadingState();
     try {
-      const res = await fetch("/", {
+      const res = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
@@ -926,6 +2172,1767 @@
   renderQuestions();
   setEmptyState();
 })();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+
+  const NODES = [
+    {
+      key: "melchior",
+      el: $("node-melchior"),
+      instructions: "MELCHIOR-1（科学者としての視点）として、次の議題を実務的・技術的な妥当性の観点から審議せよ。根拠や実現可能性が十分にあるかを重視する。",
+      trueDesc: "技術的・実務的に妥当であり、進めるべきと判断する",
+      falseDesc: "技術的・実務的な根拠が不十分で、進めるべきではないと判断する"
+    },
+    {
+      key: "balthasar",
+      el: $("node-balthasar"),
+      instructions: "BALTHASAR-2（母としての視点）として、次の議題をリスクや安全性、守るべきものの観点から審議せよ。誰かを危険や不利益にさらさないかを重視する。",
+      trueDesc: "リスクは許容範囲であり、進めるべきと判断する",
+      falseDesc: "リスクや懸念が大きく、進めるべきではないと判断する"
+    },
+    {
+      key: "casper",
+      el: $("node-casper"),
+      instructions: "CASPER-3（女としての視点）として、次の議題を直感・心情的な納得感の観点から審議せよ。素直に良いと感じられるかを重視する。",
+      trueDesc: "直感的・心情的に納得でき、進めるべきと判断する",
+      falseDesc: "直感的・心情的に納得できず、進めるべきではないと判断する"
+    }
+  ];
+
+  const topicInput = $("topic");
+  const runBtn = $("magiRunBtn");
+  const errorBox = $("errorBox");
+  const verdictEl = $("verdict");
+  const verdictTally = $("verdictTally");
+  const verdictWord = $("verdictWord");
+  const rawJson = $("rawJson");
+
+  function setNodeState(node, state) {
+    node.el.classList.remove("pending", "thinking", "agree", "disagree");
+    node.el.classList.add(state, "active");
+  }
+
+  function resetUI() {
+    errorBox.innerHTML = "";
+    verdictEl.classList.remove("show", "pass", "fail");
+    verdictTally.textContent = "\u00a0";
+    verdictWord.textContent = "\u00a0";
+    rawJson.textContent = "{}";
+    for (const n of NODES) {
+      n.el.classList.remove("agree", "disagree", "thinking");
+      n.el.classList.add("pending");
+      n.el.querySelector(".node-status").textContent = "審議中...";
+      n.el.querySelector(".node-bar-fill").style.width = "0%";
+      n.el.querySelector(".node-pct").innerHTML = "&nbsp;";
+    }
+  }
+
+  function buildBody(topic) {
+    const questions = {};
+    for (const n of NODES) {
+      questions[n.key] = {
+        type: "noul",
+        instructions: n.instructions,
+        criteria: { true: n.trueDesc, false: n.falseDesc }
+      };
+    }
+    return { state: topic, questions };
+  }
+
+  function revealNode(node, prob, delay) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const pct = Math.round(Math.max(0, Math.min(1, prob)) * 100);
+        const agree = prob >= 0.5;
+        setNodeState(node, agree ? "agree" : "disagree");
+        node.el.querySelector(".node-status").textContent = agree ? "可決" : "否決";
+        node.el.querySelector(".node-bar-fill").style.width = pct + "%";
+        node.el.querySelector(".node-pct").textContent = "confidence " + pct + "%";
+        resolve(agree);
+      }, delay);
+    });
+  }
+
+  async function run() {
+    const topic = topicInput.value.trim();
+    if (!topic) {
+      topicInput.focus();
+      return;
+    }
+
+    runBtn.disabled = true;
+    resetUI();
+    for (const n of NODES) setNodeState(n, "thinking");
+
+    try {
+      const res = await fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildBody(topic))
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch (e) { json = null; }
+
+      if (!res.ok || json === null) {
+        throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+      }
+
+      rawJson.textContent = JSON.stringify(json, null, 2);
+      const answers = json.answers || {};
+
+      const votes = [];
+      let delay = 300;
+      for (const n of NODES) {
+        const ans = answers[n.key];
+        const prob = ans && typeof ans.noul === "number" ? ans.noul : 0;
+        votes.push(revealNode(n, prob, delay));
+        delay += 550;
+      }
+      const results = await Promise.all(votes);
+      const agreeCount = results.filter(Boolean).length;
+
+      await new Promise((r) => setTimeout(r, 500));
+      const pass = agreeCount >= 2;
+      verdictTally.textContent = "議決: " + agreeCount + " : " + (3 - agreeCount);
+      verdictWord.textContent = pass ? "可決" : "否決";
+      verdictEl.classList.add("show", pass ? "pass" : "fail");
+    } catch (err) {
+      for (const n of NODES) setNodeState(n, "pending");
+      errorBox.innerHTML = '<div class="error-box"><strong>審議を継続できません</strong><br>' +
+        String(err && err.message ? err.message : err).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])) +
+        "</div>";
+    } finally {
+      runBtn.disabled = false;
+    }
+  }
+
+  runBtn.addEventListener("click", run);
+})();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+  const body = document.body;
+  const views = {
+    console: document.getElementById("view-console"),
+    magi: document.getElementById("view-magi"),
+    tetris: document.getElementById("view-tetris"),
+    mail: document.getElementById("view-mail"),
+    ime: document.getElementById("view-ime"),
+    runner: document.getElementById("view-runner"),
+    persuade: document.getElementById("view-persuade")
+  };
+  const tabs = {
+    console: document.getElementById("tab-console"),
+    magi: document.getElementById("tab-magi"),
+    tetris: document.getElementById("tab-tetris"),
+    mail: document.getElementById("tab-mail"),
+    ime: document.getElementById("tab-ime"),
+    runner: document.getElementById("tab-runner"),
+    persuade: document.getElementById("tab-persuade")
+  };
+  const MODES = Object.keys(views);
+  const LS_KEY = "jev_active_mode";
+
+  function setMode(mode) {
+    if (!MODES.includes(mode)) mode = "console";
+    for (const m of MODES) {
+      const active = m === mode;
+      body.classList.toggle("mode-" + m, active);
+      views[m].hidden = !active;
+      tabs[m].setAttribute("aria-pressed", String(active));
+    }
+    try { localStorage.setItem(LS_KEY, mode); } catch (e) {}
+  }
+
+  for (const m of MODES) {
+    tabs[m].addEventListener("click", () => setMode(m));
+  }
+
+  let saved = null;
+  try { saved = localStorage.getItem(LS_KEY); } catch (e) {}
+  setMode(MODES.includes(saved) ? saved : "console");
+})();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+
+  // ---------- pure game logic ----------
+  const ROWS = 20, COLS = 10, CELL = 24;
+
+  const BASE_SHAPES = {
+    I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    O: [[0,1,1,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],
+    T: [[0,1,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
+    S: [[0,1,1,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
+    Z: [[1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],
+    J: [[1,0,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
+    L: [[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]]
+  };
+  const PIECE_COLORS = {
+    I: "#5ee6f5", O: "#f5df5e", T: "#c07bf0", S: "#7bf09a",
+    Z: "#f0687b", J: "#6b8ff5", L: "#f5a35e"
+  };
+
+  function rotateMatrix(m) {
+    const n = 4;
+    const out = Array.from({length:n}, () => Array(n).fill(0));
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) out[x][n-1-y] = m[y][x];
+    return out;
+  }
+  function cellsOf(matrix) {
+    const cells = [];
+    for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) if (matrix[y][x]) cells.push({x, y});
+    return cells;
+  }
+  function normalizedShapeKey(matrix) {
+    const cells = cellsOf(matrix);
+    const minX = Math.min(...cells.map(c => c.x));
+    const minY = Math.min(...cells.map(c => c.y));
+    return cells.map(c => `${c.x - minX},${c.y - minY}`).sort().join('|');
+  }
+  function getRotations(type) {
+    const rotations = [];
+    let m = BASE_SHAPES[type];
+    const seen = new Set();
+    for (let i = 0; i < 4; i++) {
+      const key = normalizedShapeKey(m);
+      if (!seen.has(key)) { seen.add(key); rotations.push(m); }
+      m = rotateMatrix(m);
+    }
+    return rotations;
+  }
+  function createEmptyBoard() {
+    return Array.from({length: ROWS}, () => Array(COLS).fill(null));
+  }
+  function collision(board, cells, offX, offY) {
+    for (const c of cells) {
+      const gx = offX + c.x, gy = offY + c.y;
+      if (gx < 0 || gx >= COLS || gy >= ROWS) return true;
+      if (gy >= 0 && board[gy][gx]) return true;
+    }
+    return false;
+  }
+  function dropY(board, cells, x) {
+    let y = -4;
+    while (collision(board, cells, x, y)) y++;
+    while (!collision(board, cells, x, y + 1)) y++;
+    return y;
+  }
+  function cloneBoard(board) { return board.map(row => row.slice()); }
+  function placeCells(board, cells, offX, offY, color) {
+    for (const c of cells) {
+      const gx = offX + c.x, gy = offY + c.y;
+      if (gy >= 0 && gy < ROWS && gx >= 0 && gx < COLS) board[gy][gx] = color;
+    }
+  }
+  function clearLines(board) {
+    let cleared = 0;
+    const kept = board.filter(row => {
+      const full = row.every(cell => cell !== null);
+      if (full) cleared++;
+      return !full;
+    });
+    while (kept.length < ROWS) kept.unshift(Array(COLS).fill(null));
+    return { board: kept, cleared };
+  }
+  function computeMetrics(board) {
+    const heights = Array(COLS).fill(0);
+    for (let x = 0; x < COLS; x++) {
+      for (let y = 0; y < ROWS; y++) {
+        if (board[y][x]) { heights[x] = ROWS - y; break; }
+      }
+    }
+    const aggregateHeight = heights.reduce((a,b) => a+b, 0);
+    let bumpiness = 0;
+    for (let i = 0; i < COLS - 1; i++) bumpiness += Math.abs(heights[i] - heights[i+1]);
+    let holes = 0;
+    for (let x = 0; x < COLS; x++) {
+      let seenBlock = false;
+      for (let y = 0; y < ROWS; y++) {
+        if (board[y][x]) seenBlock = true;
+        else if (seenBlock) holes++;
+      }
+    }
+    return { aggregateHeight, bumpiness, holes };
+  }
+  function generateCandidates(board, type) {
+    const rotations = getRotations(type);
+    const candidates = [];
+    const panic = isPanicking(board);
+    rotations.forEach((matrix, rotIndex) => {
+      const cells = cellsOf(matrix);
+      const xs = cells.map(c => c.x);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      for (let x = -minX; x <= COLS - 1 - maxX; x++) {
+        const landY = dropY(board, cells, x);
+        const test = cloneBoard(board);
+        placeCells(test, cells, x, landY, type);
+        const { board: cleared, cleared: linesCleared } = clearLines(test);
+        const metrics = computeMetrics(cleared);
+        const touchesWell = cells.some(c => (x + c.x) === WELL_COLUMN);
+        const heuristicScore = panic
+          ? survivalScore(metrics, linesCleared)
+          : highScoreScore(metrics, linesCleared, touchesWell);
+        candidates.push({ rotIndex, x, landY, cells, linesCleared, ...metrics, heuristicScore, resultBoard: cleared, panicMode: panic });
+      }
+    });
+    return candidates;
+  }
+
+  // 盤面が危険なほど積み上がっていたら、井戸戦略より生存を優先する
+  const WELL_COLUMN = COLS - 1; // 右端の列をテトリス用に空けておく「井戸」にする
+  const PANIC_MAX_HEIGHT = 14;  // どこかの列がこの高さを超えたら生存優先モードへ
+  const LINE_CLEAR_BONUS = [0, 1, 3, 5, 8]; // 本家スコア比(100/300/500/800)を反映
+
+  function isPanicking(board) {
+    for (let x = 0; x < COLS; x++) {
+      for (let y = 0; y < ROWS; y++) {
+        if (board[y][x]) { if (ROWS - y >= PANIC_MAX_HEIGHT) return true; break; }
+      }
+    }
+    return false;
+  }
+
+  // 生存優先(旧来のDellacherie系。ラインは消せるだけ消しておく)
+  function survivalScore(metrics, linesCleared) {
+    return (
+      -0.510066 * metrics.aggregateHeight +
+      0.760666 * linesCleared +
+      -0.35663 * metrics.holes +
+      -0.184483 * metrics.bumpiness
+    );
+  }
+
+  // 高得点狙い: 右端の列を空けたまま積み上げ、テトリス(4ライン消し)を狙う
+  function highScoreScore(metrics, linesCleared, touchesWell) {
+    // 井戸の両隣の高さ差はbumpinessの計算対象から除外したいが、
+    // computeMetricsは全体のbumpinessしか返さないため、ここでは
+    // 「井戸に触れた場合の追加ペナルティ」で代用して過度な井戸埋めを防ぐ。
+    const wellViolation = (touchesWell && linesCleared < 4) ? -3 : 0;
+    const lineBonus = LINE_CLEAR_BONUS[linesCleared] || 0;
+    return (
+      -0.510066 * metrics.aggregateHeight +
+      lineBonus +
+      -0.35663 * metrics.holes +
+      -0.184483 * metrics.bumpiness +
+      wellViolation
+    );
+  }
+
+  // 次のピースを最適に置いた場合に見込める最良スコア(1手先読み)
+  function bestNextScore(board, nextPieceType) {
+    if (!nextPieceType) return 0;
+    const candidates = generateCandidates(board, nextPieceType);
+    let best = -Infinity;
+    for (const c of candidates) if (c.heuristicScore > best) best = c.heuristicScore;
+    return best === -Infinity ? 0 : best;
+  }
+
+  const LOOKAHEAD_WEIGHT = 0.7;
+  const MAX_CANDIDATES_SHOWN = 8;
+
+  // 現在ピースの候補に、次のピースを踏まえた総合スコアを付けて上位だけに絞る
+  function rankCandidates(board, type, peekedNext) {
+    const candidates = generateCandidates(board, type);
+    for (const c of candidates) {
+      const next = bestNextScore(c.resultBoard, peekedNext);
+      c.nextBestScore = next;
+      c.totalScore = c.heuristicScore + LOOKAHEAD_WEIGHT * next;
+    }
+    candidates.sort((a, b) => b.totalScore - a.totalScore);
+    return candidates.slice(0, MAX_CANDIDATES_SHOWN);
+  }
+
+  // ---------- 7-bag randomizer ----------
+  let bag = [];
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function nextType() {
+    if (bag.length === 0) bag = shuffle(['I','O','T','S','Z','J','L']);
+    return bag.pop();
+  }
+  function peekNextType() {
+    if (bag.length === 0) bag = shuffle(['I','O','T','S','Z','J','L']);
+    return bag[bag.length - 1];
+  }
+
+  // ---------- game state ----------
+  let board = createEmptyBoard();
+  let score = 0, linesTotal = 0, piecesTotal = 0;
+  let isRunning = false;
+  let isBusy = false; // true while thinking/animating, to prevent overlapping loops
+
+  const canvas = document.getElementById("board");
+  const ctx = canvas.getContext("2d");
+  const statScore = document.getElementById("statScore");
+  const statLines = document.getElementById("statLines");
+  const statPieces = document.getElementById("statPieces");
+  const thinkingDot = document.getElementById("thinkingDot");
+  const thinkingText = document.getElementById("thinkingText");
+  const lastMove = document.getElementById("lastMove");
+  const tetrisReqLog = document.getElementById("tetrisReqLog");
+  const tetrisResLog = document.getElementById("tetrisResLog");
+  const errorBox = document.getElementById("tetrisErrorBox");
+  const gameoverBanner = document.getElementById("gameoverBanner");
+  const startBtn = document.getElementById("startBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const skipAnim = document.getElementById("skipAnim");
+
+  function setThinking(on, label) {
+    thinkingDot.classList.toggle("active", !!on);
+    thinkingText.textContent = label || (on ? "考え中..." : "待機中");
+  }
+
+  function drawCell(gx, gy, color) {
+    const px = gx * CELL, py = gy * CELL;
+    ctx.fillStyle = color;
+    ctx.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.fillRect(px + 1, py + 1, CELL - 2, 4);
+  }
+
+  function render(activePiece) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    for (let x = 0; x <= COLS; x++) {
+      ctx.beginPath(); ctx.moveTo(x * CELL, 0); ctx.lineTo(x * CELL, ROWS * CELL); ctx.stroke();
+    }
+    for (let y = 0; y <= ROWS; y++) {
+      ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(COLS * CELL, y * CELL); ctx.stroke();
+    }
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (board[y][x]) drawCell(x, y, PIECE_COLORS[board[y][x]] || "#888");
+      }
+    }
+    if (activePiece) {
+      const { cells, x, y, type } = activePiece;
+      for (const c of cells) {
+        const gy = y + c.y;
+        if (gy >= 0) drawCell(x + c.x, gy, PIECE_COLORS[type]);
+      }
+    }
+  }
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInCubic(t) { return t * t * t; }
+
+  function animateMove(type, cells, fromX, targetX, targetY, duration) {
+    return new Promise((resolve) => {
+      if (duration <= 0) { resolve(); return; }
+      const start = performance.now();
+      const slideEnd = duration * 0.45;
+      function frame(now) {
+        const elapsed = now - start;
+        let curX, curY;
+        if (elapsed <= slideEnd) {
+          const t = easeOutCubic(Math.min(1, elapsed / slideEnd));
+          curX = fromX + (targetX - fromX) * t;
+          curY = 0;
+        } else {
+          curX = targetX;
+          const t = easeInCubic(Math.min(1, (elapsed - slideEnd) / (duration - slideEnd)));
+          curY = targetY * t;
+        }
+        render({ type, cells, x: Math.round(curX), y: curY });
+        if (elapsed < duration) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function buildJevRequest(type, candidates) {
+    const criteria = {};
+    candidates.forEach((c, i) => {
+      criteria["c" + i] =
+        `順位${i + 1}(スコア${c.totalScore.toFixed(2)}): ` +
+        `高さ合計=${c.aggregateHeight}, 穴の数=${c.holes}, 凹凸=${c.bumpiness}, 消去ライン=${c.linesCleared}, ` +
+        `次のピースを最適配置した場合の見込みスコア=${c.nextBestScore.toFixed(2)}`;
+    });
+    return {
+      state: `テトリスの盤面。落ちてくるピースは${type}。候補はスコアの高い順(順位1位が最良)に並んでおり、次のピースまで考慮した見込みスコアも含む。`,
+      questions: {
+        move: {
+          type: "choice",
+          instructions: "この中から最も盤面を良い状態に保てる配置を1つ選んでください。基本的にはスコアが最も高い(順位1位の)候補を選ぶべきですが、次のピースの見込みスコアも著しく良い場合はそちらを優先しても構いません。",
+          criteria
+        }
+      }
+    };
+  }
+
+  async function askJev(type, candidates) {
+    const requestBody = buildJevRequest(type, candidates);
+    tetrisReqLog.textContent = JSON.stringify(requestBody, null, 2);
+    tetrisResLog.textContent = "受信待ち...";
+
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody)
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = null; }
+    tetrisResLog.textContent = json !== null ? JSON.stringify(json, null, 2) : text.slice(0, 2000);
+    if (!res.ok || json === null) {
+      throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+    }
+    const ans = json.answers && json.answers.move;
+    if (!ans || typeof ans.choice !== "string") {
+      throw new Error("Jevの応答から choice が取得できませんでした: " + JSON.stringify(json));
+    }
+    const idx = parseInt(ans.choice.replace("c", ""), 10);
+    if (Number.isNaN(idx) || !candidates[idx]) {
+      // フォールバック: パースできなければ最初の候補を使う
+      return { candidate: candidates[0], confidence: ans.confidence, raw: ans };
+    }
+    return { candidate: candidates[idx], confidence: ans.confidence, raw: ans };
+  }
+
+  function showError(msg) {
+    errorBox.innerHTML = '<div class="error-box"><strong>停止しました</strong><br>' +
+      String(msg).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])) + '</div>';
+  }
+  function clearError() { errorBox.innerHTML = ""; }
+
+  async function step() {
+    if (isBusy || !isRunning) return;
+    isBusy = true;
+    clearError();
+
+    const type = nextType();
+    const rotations = getRotations(type);
+    const baseCells = cellsOf(rotations[0]);
+    const spawnX = Math.floor(COLS / 2) - 2;
+
+    if (collision(board, baseCells, spawnX, 0)) {
+      isRunning = false;
+      isBusy = false;
+      gameoverBanner.hidden = false;
+      setThinking(false, "ゲームオーバー");
+      startBtn.textContent = "開始";
+      return;
+    }
+
+    render({ type, cells: baseCells, x: spawnX, y: 0 });
+    setThinking(true, "Jevが" + type + "ピースを審議中...");
+
+    try {
+      const peeked = peekNextType();
+      const candidates = rankCandidates(board, type, peeked);
+      const { candidate, confidence } = await askJev(type, candidates);
+      const chosenCells = candidate.cells;
+      const duration = skipAnim.checked ? 0 : 550;
+
+      await animateMove(type, chosenCells, spawnX, candidate.x, candidate.landY, duration);
+
+      board = candidate.resultBoard;
+      const cleared = candidate.linesCleared;
+
+      piecesTotal++;
+      linesTotal += cleared;
+      score += [0, 100, 300, 500, 800][cleared] || 0;
+      statScore.textContent = score;
+      statLines.textContent = linesTotal;
+      statPieces.textContent = piecesTotal;
+
+      const rank = candidates.indexOf(candidate) + 1;
+      lastMove.innerHTML = `<b>${type}</b> → 順位${rank > 0 ? rank : "?"}位の候補 (回転${candidate.rotIndex} / x=${candidate.x})` +
+        (cleared ? ` / <b>${cleared}ライン消去!</b>` : "") +
+        (typeof confidence === "number" ? ` / confidence ${Math.round(confidence*100)}%` : "");
+
+      render(null);
+      setThinking(false, isRunning ? "待機中" : "一時停止");
+    } catch (err) {
+      isRunning = false;
+      startBtn.textContent = "開始";
+      setThinking(false, "エラーで停止");
+      showError(err && err.message ? err.message : String(err));
+    } finally {
+      isBusy = false;
+      if (isRunning) setTimeout(step, 250);
+    }
+  }
+
+  function reset() {
+    isRunning = false;
+    isBusy = false;
+    board = createEmptyBoard();
+    bag = [];
+    score = 0; linesTotal = 0; piecesTotal = 0;
+    statScore.textContent = "0";
+    statLines.textContent = "0";
+    statPieces.textContent = "0";
+    lastMove.textContent = "まだありません";
+    tetrisReqLog.textContent = "まだありません";
+    tetrisResLog.textContent = "まだありません";
+    gameoverBanner.hidden = true;
+    startBtn.textContent = "開始";
+    clearError();
+    setThinking(false, "待機中");
+    render(null);
+  }
+
+  startBtn.addEventListener("click", () => {
+    if (isRunning) {
+      isRunning = false;
+      startBtn.textContent = "再開";
+      setThinking(false, "一時停止");
+    } else {
+      isRunning = true;
+      startBtn.textContent = "一時停止";
+      gameoverBanner.hidden = true;
+      if (!isBusy) step();
+    }
+  });
+  resetBtn.addEventListener("click", reset);
+
+  reset();
+})();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+
+  const CATEGORIES = {
+    work: "仕事関連(会議、プロジェクト、社内連絡、タスク依頼など)",
+    billing: "請求書・支払い関連(利用料金、サブスク更新、決済、経理など)",
+    notification: "自動通知(配送状況、ログイン通知、リマインダーなど対応不要な情報共有)",
+    spam: "迷惑メール(不審な当選通知、緊急を装う詐欺的な内容、身に覚えのない勧誘)",
+    personal: "個人的な連絡(友人・家族からのプライベートなメッセージ)"
+  };
+  const CATEGORY_LABELS = {
+    work: "仕事", billing: "請求", notification: "通知", spam: "迷惑メール", personal: "個人", pending: "未仕分け"
+  };
+
+  const RAW_EMAILS = [
+    ["work","佐藤 香織(営業部)","明日の定例MTGの資料共有","お疲れ様です。明日14時からの定例ミーティングで使う資料を添付しました。事前にご確認ください。"],
+    ["work","田中 大輔(開発チーム)","新機能のレビュー依頼","新しいログイン機能の実装が終わりました。お手すきの時にレビューをお願いできますか。"],
+    ["work","鈴木マネージャー","来週の出張スケジュールについて","来週の大阪出張の件、新幹線のチケットを手配しました。詳細は添付の行程表をご覧ください。"],
+    ["work","高橋(人事部)","有給申請フォームの提出について","月末までに有給申請フォームの提出をお願いします。未提出の方は今週中にご対応ください。"],
+    ["work","伊藤リーダー","プロジェクトAの進捗共有","今週のタスクはほぼ完了しています。残りの課題は来週の会議で相談させてください。"],
+    ["work","中村(経理部)","経費精算の締め切りについて","今月分の経費精算は25日締め切りです。レシートの添付を忘れずにお願いします。"],
+    ["work","山本部長","来期の予算案について","来期の予算案のたたき台を作成しました。木曜までにフィードバックをいただけますか。"],
+    ["work","小林(採用担当)","面接日程の確認","来週火曜14時からの面接、会議室Bで確定しました。よろしくお願いいたします。"],
+    ["work","加藤(品質保証)","バグ報告: ログイン画面の不具合","特定条件でログインボタンが反応しない不具合を確認しました。詳細を添付します。"],
+    ["work","渡辺(広報)","社内報の原稿締切のご案内","次号の社内報の原稿締切は今月末です。まだの方はお早めにご提出ください。"],
+
+    ["billing","CloudNine請求担当","【重要】ご請求書発行のお知らせ","今月分のご請求書を発行しました。マイページからPDFをダウンロードいただけます。"],
+    ["billing","SunnyStorageサポート","サブスクリプション自動更新のご案内","ご契約中のプランは来月1日に自動更新されます。プラン変更は更新日の3日前までにお願いします。"],
+    ["billing","PixelWorks経理部","お支払い期限が近づいています","先月分のご利用料金のお支払い期限は今週金曜日です。未払いの場合はご確認ください。"],
+    ["billing","StreamBoxカスタマーサービス","今月のご利用料金明細","今月のご利用料金は1,480円です。明細の詳細はマイアカウントページをご確認ください。"],
+    ["billing","NimbusVPNサポート","決済情報の更新をお願いします","ご登録のクレジットカードの有効期限が近づいています。決済情報の更新をお願いいたします。"],
+    ["billing","OfficeSuite請求窓口","年間プランのご請求について","年間プランのご請求手続きが完了しました。領収書は添付ファイルをご確認ください。"],
+    ["billing","GreenEnergy電力","今月分の電気料金のお知らせ","今月のご利用量に基づく電気料金は6,200円です。口座振替日は27日です。"],
+    ["billing","FitTrackジム会員窓口","会費のお支払いについて","今月の会費のお支払いが確認できておりません。お心当たりのない場合はご連絡ください。"],
+    ["billing","BrightNet通信","ご利用明細発行のお知らせ","今月のご利用明細を発行しました。データ通信量は先月より増加しています。"],
+    ["billing","QuickTax会計サービス","請求書発行サービスのご利用料金","今月分のサービス利用料金1,200円を来週引き落とし予定です。"],
+
+    ["notification","FastShip配送センター","商品が発送されました","ご注文の商品を発送しました。お届け予定日は明後日です。追跡番号はこちらです。"],
+    ["notification","SecureLoginシステム","新しいログインを検知しました","先ほど新しいデバイスからログインがありました。心当たりがない場合はパスワードを変更してください。"],
+    ["notification","AppStorePlus","パスワードが変更されました","アカウントのパスワードが正常に変更されました。この操作に心当たりがない場合はサポートまでご連絡ください。"],
+    ["notification","WeatherNow","明日の天気予報","明日はお住まいの地域で雨の予報です。傘をお忘れなく。"],
+    ["notification","CalendarSync","予定のリマインダー","明日10時に「歯医者の予約」の予定があります。"],
+    ["notification","CityLibrary","貸出中の本の返却期限のお知らせ","貸出中の書籍の返却期限は明日までです。延長をご希望の場合はアプリからお手続きください。"],
+    ["notification","HealthTrackアプリ","今週の活動レポート","今週の平均歩数は6,200歩でした。先週より15%増加しています。"],
+    ["notification","ParkEasy駐車場","予約完了のお知らせ","明日9時〜18時の駐車場予約が完了しました。当日はQRコードをご提示ください。"],
+    ["notification","NewsDailyアプリ","今日の注目ニュース","本日のおすすめ記事を3件お届けします。アプリ内でご覧いただけます。"],
+    ["notification","SmartHomeシステム","玄関センサーが反応しました","本日15時32分に玄関のセンサーが反応しました。録画映像はアプリからご確認いただけます。"],
+
+    ["spam","特別当選係","おめでとうございます!当選しました","あなたは特別抽選で1等に当選しました。下記リンクから24時間以内にご確認ください。"],
+    ["spam","緊急サポートセンター","【至急】アカウントが停止されます","不審なアクセスを検知したため、アカウントを一時停止します。今すぐ下記から本人確認をしてください。"],
+    ["spam","ラッキーウィナー事務局","無料プレゼントが当たりました","抽選の結果、豪華賞品が当たりました。受け取りには本人情報の入力が必要です。"],
+    ["spam","調査アンケート運営","今すぐ確認してください","簡単なアンケートに答えるだけで謝礼がもらえます。今すぐ下記フォームにご記入ください。"],
+    ["spam","不明な送信者","あなたは選ばれました","特別なオファーがあります。詳細は添付ファイルをすぐにご確認ください。"],
+    ["spam","プレミアム会員事務局","会員資格が失効します","24時間以内に手続きをしないと、プレミアム特典が失効します。今すぐこちらから更新してください。"],
+    ["spam","セキュリティ通知係","パスワードの緊急更新が必要です","セキュリティ上の理由により、今すぐパスワードを更新する必要があります。下記リンクからどうぞ。"],
+    ["spam","配送トラブル対応室","荷物の受け取りに問題があります","関税の未払いにより荷物が保留されています。至急下記フォームから支払い情報をご入力ください。"],
+    ["spam","高額報酬案件紹介","在宅で簡単に高収入","1日30分の作業で高収入が得られる案件をご紹介します。今すぐ登録して詳細を確認しましょう。"],
+    ["spam","口座確認センター","口座情報の確認が必要です","不正利用の疑いがあるため、口座情報の確認が必要です。下記リンクから至急ご対応ください。"],
+
+    ["personal","お母さん","今度の週末空いてる?","久しぶりにご飯でも食べに来ない?お父さんも会いたがってるよ。"],
+    ["personal","ゆうき","誕生日おめでとう!","誕生日おめでとう!今度お祝いさせて、好きな店予約しとくね。"],
+    ["personal","サークルの先輩","元気にしてる?","最近全然会ってないけど元気にしてる?今度の同窓会来る?"],
+    ["personal","大学の友人","写真送るね","この前の旅行の写真整理したから送るね!めっちゃいい写真撮れてたよ。"],
+    ["personal","近所の田中さん","回覧板です","回覧板を郵便受けに入れておきました。確認したら隣の家に回してもらえると助かります。"],
+    ["personal","高校の同級生","今度ご飯行こうよ","久しぶり!近くまで来る用事があるから、良ければご飯でも行かない?"],
+    ["personal","弟","ゲーム貸してくれない?","この前話してたゲーム、今度貸してくれない?今週末暇だから。"],
+    ["personal","元同僚","転職おめでとうございます","転職の話聞いたよ、おめでとう!今度お祝いしよう、都合いい日教えて。"],
+    ["personal","おばあちゃん","お元気ですか","寒くなってきたけど元気にしてる?体に気をつけてね。"],
+    ["personal","趣味サークルの仲間","次回の集まりについて","次回の集まりは来月第2土曜日にしようと思うけど都合どう?"]
+  ];
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let emails = []; // { id, trueCategory, from, subject, snippet, status, category }
+  const BATCH_SIZE = 10;
+
+  const mailList = document.getElementById("mailList");
+  const startBtn = document.getElementById("mailStartBtn");
+  const resetBtn = document.getElementById("mailResetBtn");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
+  const summaryEl = document.getElementById("summary");
+  const errorBox = document.getElementById("mailErrorBox");
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  function buildEmails() {
+    const shuffled = shuffle(RAW_EMAILS);
+    return shuffled.map((e, i) => ({
+      id: "e" + i,
+      trueCategory: e[0],
+      from: e[1],
+      subject: e[2],
+      snippet: e[3],
+      status: "pending",
+      category: null
+    }));
+  }
+
+  function renderList() {
+    mailList.innerHTML = emails.map(e => `
+      <div class="mail-row" id="row-${e.id}" data-id="${e.id}">
+        <span class="mail-tag pending" id="tag-${e.id}">未仕分け</span>
+        <div class="mail-body">
+          <div class="mail-from">${esc(e.from)}</div>
+          <div class="mail-subject">${esc(e.subject)}</div>
+          <div class="mail-snippet">${esc(e.snippet)}</div>
+        </div>
+      </div>
+    `).join("");
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".mail-row").forEach((el, i) => {
+        setTimeout(() => el.classList.add("in"), i * 12);
+      });
+    });
+  }
+
+  function renderSummary() {
+    const counts = { work: 0, billing: 0, notification: 0, spam: 0, personal: 0, pending: 0 };
+    for (const e of emails) counts[e.status === "done" ? e.category : "pending"]++;
+    const order = ["work", "billing", "notification", "spam", "personal", "pending"];
+    summaryEl.innerHTML = order
+      .filter(k => counts[k] > 0)
+      .map(k => `<button type="button" class="chip" data-filter="${k}">${CATEGORY_LABELS[k]} ${counts[k]}</button>`)
+      .join("");
+  }
+
+  let activeFilter = null;
+  summaryEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-filter]");
+    if (!btn) return;
+    const f = btn.dataset.filter;
+    activeFilter = activeFilter === f ? null : f;
+    applyFilter();
+    renderFilterButtons();
+  });
+  function renderFilterButtons() {
+    summaryEl.querySelectorAll("button[data-filter]").forEach(b => {
+      b.setAttribute("aria-pressed", String(b.dataset.filter === activeFilter));
+    });
+  }
+  function applyFilter() {
+    for (const e of emails) {
+      const row = document.getElementById("row-" + e.id);
+      if (!row) continue;
+      const show = !activeFilter || (activeFilter === "pending" ? e.status !== "done" : e.category === activeFilter);
+      row.classList.toggle("hidden-by-filter", !show);
+    }
+  }
+
+  function setTag(id, category, pending) {
+    const tag = document.getElementById("tag-" + id);
+    if (!tag) return;
+    tag.className = "mail-tag " + (pending ? "pending" : category);
+    tag.textContent = pending ? "未仕分け" : CATEGORY_LABELS[category] || category;
+  }
+
+  function showError(msg) {
+    errorBox.innerHTML = '<div class="error-box"><strong>停止しました:</strong> ' + esc(msg) + '</div>';
+  }
+  function clearError() { errorBox.innerHTML = ""; }
+
+  function buildBatchRequest(batch) {
+    const emailsObj = {};
+    const questions = {};
+    for (const e of batch) {
+      emailsObj[e.id] = { from: e.from, subject: e.subject, snippet: e.snippet };
+      questions[e.id] = {
+        type: "choice",
+        instructions: `state.emails.${e.id} の内容を確認し、最も適切なカテゴリを1つ選んでください。`,
+        criteria: CATEGORIES
+      };
+    }
+    return { state: { emails: emailsObj }, questions };
+  }
+
+  async function classifyBatch(batch) {
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildBatchRequest(batch))
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = null; }
+    if (!res.ok || json === null) {
+      throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+    }
+    return json.answers || {};
+  }
+
+  let isRunning = false;
+
+  async function run() {
+    if (isRunning) return;
+    isRunning = true;
+    startBtn.disabled = true;
+    clearError();
+
+    let done = emails.filter(e => e.status === "done").length;
+    const pending = emails.filter(e => e.status === "pending");
+
+    for (let i = 0; i < pending.length; i += BATCH_SIZE) {
+      const batch = pending.slice(i, i + BATCH_SIZE);
+      batch.forEach(e => document.getElementById("row-" + e.id) && document.getElementById("row-" + e.id).classList.add("thinking"));
+      try {
+        const answers = await classifyBatch(batch);
+        batch.forEach((e, idx) => {
+          const ans = answers[e.id];
+          const category = (ans && Object.keys(CATEGORIES).includes(ans.choice)) ? ans.choice : "notification";
+          setTimeout(() => {
+            e.status = "done";
+            e.category = category;
+            const row = document.getElementById("row-" + e.id);
+            if (row) row.classList.remove("thinking");
+            setTag(e.id, category, false);
+            done++;
+            progressFill.style.width = Math.round((done / emails.length) * 100) + "%";
+            progressText.textContent = done + " / " + emails.length + " 件処理済み";
+            renderSummary();
+            renderFilterButtons();
+            applyFilter();
+          }, idx * 60);
+        });
+        await new Promise(r => setTimeout(r, batch.length * 60 + 150));
+      } catch (err) {
+        showError(err && err.message ? err.message : String(err));
+        batch.forEach(e => document.getElementById("row-" + e.id) && document.getElementById("row-" + e.id).classList.remove("thinking"));
+        break;
+      }
+    }
+
+    isRunning = false;
+    startBtn.disabled = false;
+    startBtn.textContent = "再実行";
+  }
+
+  function reset() {
+    isRunning = false;
+    emails = buildEmails();
+    activeFilter = null;
+    done_reset();
+    renderList();
+    renderSummary();
+    clearError();
+    startBtn.disabled = false;
+    startBtn.textContent = "仕分け開始";
+  }
+  function done_reset() {
+    progressFill.style.width = "0%";
+    progressText.textContent = "0 / " + RAW_EMAILS.length + " 件処理済み";
+  }
+
+  startBtn.addEventListener("click", run);
+  resetBtn.addEventListener("click", reset);
+
+  reset();
+})();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+
+  // ---------- ローマ字 -> ひらがな ----------
+  const SMALL_Y = { a: 'ゃ', u: 'ゅ', o: 'ょ' };
+  const BASE = {
+    a:'あ', i:'い', u:'う', e:'え', o:'お',
+    ka:'か', ki:'き', ku:'く', ke:'け', ko:'こ',
+    sa:'さ', shi:'し', si:'し', su:'す', se:'せ', so:'そ',
+    ta:'た', chi:'ち', ti:'ち', tsu:'つ', tu:'つ', te:'て', to:'と',
+    na:'な', ni:'に', nu:'ぬ', ne:'ね', no:'の',
+    ha:'は', hi:'ひ', fu:'ふ', hu:'ふ', he:'へ', ho:'ほ',
+    ma:'ま', mi:'み', mu:'む', me:'め', mo:'も',
+    ya:'や', yu:'ゆ', yo:'よ',
+    ra:'ら', ri:'り', ru:'る', re:'れ', ro:'ろ',
+    wa:'わ', wo:'を', wi:'うぃ', we:'うぇ',
+    ga:'が', gi:'ぎ', gu:'ぐ', ge:'げ', go:'ご',
+    za:'ざ', ji:'じ', zi:'じ', zu:'ず', ze:'ぜ', zo:'ぞ',
+    da:'だ', di:'ぢ', du:'づ', de:'で', do:'ど',
+    ba:'ば', bi:'び', bu:'ぶ', be:'べ', bo:'ぼ',
+    pa:'ぱ', pi:'ぴ', pu:'ぷ', pe:'ぺ', po:'ぽ'
+  };
+  const YOUON_BASES = { ky:'き', sh:'し', ch:'ち', ny:'に', hy:'ひ', my:'み', ry:'り', gy:'ぎ', j:'じ', by:'び', py:'ぴ' };
+
+  function buildTable() {
+    const table = {};
+    for (const [k, v] of Object.entries(BASE)) table[k] = v;
+    for (const [prefix, kana] of Object.entries(YOUON_BASES)) {
+      for (const [vowel, smallY] of Object.entries(SMALL_Y)) {
+        if (prefix === 'j') table['j' + vowel] = 'じ' + smallY;
+        else if (prefix === 'sh') table['sh' + vowel] = 'し' + smallY;
+        else if (prefix === 'ch') table['ch' + vowel] = 'ち' + smallY;
+        else table[prefix + vowel] = kana + smallY;
+      }
+    }
+    return table;
+  }
+  const TABLE = buildTable();
+  const MAX_LEN = Math.max(...Object.keys(TABLE).map(k => k.length));
+  const CONSONANTS = 'bcdfghjklmnpqrstvwxyz';
+
+  function romajiToHiragana(input) {
+    const s = input.toLowerCase();
+    let out = '';
+    let i = 0;
+    while (i < s.length) {
+      if (i + 1 < s.length && CONSONANTS.includes(s[i]) && s[i] !== 'n' &&
+          (s[i] === s[i+1] || (s[i] === 't' && s[i+1] === 'c'))) {
+        out += 'っ'; i += 1; continue;
+      }
+      let matched = false;
+      for (let len = Math.min(MAX_LEN, s.length - i); len >= 1; len--) {
+        const chunk = s.slice(i, i + len);
+        if (TABLE[chunk]) { out += TABLE[chunk]; i += len; matched = true; break; }
+      }
+      if (matched) continue;
+      if (s[i] === 'n') {
+        const next = s[i+1];
+        if (next === 'n') { out += 'ん'; i += 1; continue; }
+        if (!next || !'aiueoy'.includes(next)) { out += 'ん'; i += 1; continue; }
+        out += 'ん'; i += 1; continue;
+      }
+      out += s[i]; i += 1;
+    }
+    return out;
+  }
+
+  // ---------- 辞書 ----------
+  const DICT = {
+    "かみ": [{k:"髪",g:"頭の毛"},{k:"紙",g:"書く/印刷する紙"},{k:"神",g:"神様"}],
+    "はし": [{k:"橋",g:"川にかける橋"},{k:"箸",g:"食事の箸"},{k:"端",g:"はし・へり"}],
+    "きく": [{k:"聞く",g:"音を聞く/尋ねる"},{k:"効く",g:"効果がある"},{k:"菊",g:"花の菊"}],
+    "かえる": [{k:"帰る",g:"家に帰る"},{k:"変える",g:"変化させる"},{k:"蛙",g:"カエル(生き物)"}],
+    "あける": [{k:"開ける",g:"開く"},{k:"明ける",g:"夜が明ける"},{k:"空ける",g:"空にする"}],
+    "いる": [{k:"居る",g:"人がいる"},{k:"要る",g:"必要である"}],
+    "とる": [{k:"取る",g:"手に取る"},{k:"撮る",g:"写真を撮る"},{k:"採る",g:"採取する"}],
+    "はな": [{k:"花",g:"植物の花"},{k:"鼻",g:"顔の鼻"}],
+    "あう": [{k:"会う",g:"人に会う"},{k:"合う",g:"サイズなどが合う"}],
+    "きる": [{k:"切る",g:"刃物で切る"},{k:"着る",g:"服を着る"}],
+    "なく": [{k:"泣く",g:"涙を流す"},{k:"鳴く",g:"動物が鳴く"}],
+    "うつ": [{k:"打つ",g:"たたく"},{k:"撃つ",g:"銃で撃つ"}],
+    "はやい": [{k:"早い",g:"時間が早い"},{k:"速い",g:"スピードが速い"}],
+    "あつい": [{k:"暑い",g:"気温が暑い"},{k:"熱い",g:"物が熱い"},{k:"厚い",g:"厚みがある"}],
+    "かわ": [{k:"川",g:"river"},{k:"皮",g:"皮膚・表皮"},{k:"革",g:"革製品のかわ"}],
+    "こえ": [{k:"声",g:"人の声"},{k:"肥え",g:"肥料/太る"}],
+    "みる": [{k:"見る",g:"目で見る"},{k:"診る",g:"診察する"}],
+
+    "わたし": [{k:"私"}], "ぼく": [{k:"僕"}], "ほん": [{k:"本"}], "がっこう": [{k:"学校"}],
+    "せんせい": [{k:"先生"}], "がくせい": [{k:"学生"}], "かいしゃ": [{k:"会社"}], "しごと": [{k:"仕事"}],
+    "きょう": [{k:"今日"}], "あした": [{k:"明日"}], "きのう": [{k:"昨日"}], "いま": [{k:"今"}],
+    "じかん": [{k:"時間"}], "でんわ": [{k:"電話"}], "でんしゃ": [{k:"電車"}], "くるま": [{k:"車"}],
+    "いえ": [{k:"家"}], "うち": [{k:"家"}], "がいこく": [{k:"外国"}], "にほん": [{k:"日本"}],
+    "にほんご": [{k:"日本語"}], "えいご": [{k:"英語"}], "ともだち": [{k:"友達"}], "かぞく": [{k:"家族"}],
+    "たべる": [{k:"食べる"}], "たべます": [{k:"食べます"}], "たべた": [{k:"食べた"}],
+    "のむ": [{k:"飲む"}], "のみます": [{k:"飲みます"}],
+    "いく": [{k:"行く"}], "いきます": [{k:"行きます"}], "いった": [{k:"行った"}],
+    "くる": [{k:"来る"}], "きます": [{k:"来ます"}], "きた": [{k:"来た"}],
+    "する": [{k:"する"}], "します": [{k:"します"}], "した": [{k:"した"}],
+    "はなす": [{k:"話す"}], "はなします": [{k:"話します"}],
+    "よむ": [{k:"読む"}], "よみます": [{k:"読みます"}],
+    "かく": [{k:"書く"}], "かきます": [{k:"書きます"}],
+    "べんきょう": [{k:"勉強"}], "しゅくだい": [{k:"宿題"}], "しつもん": [{k:"質問"}],
+    "おかね": [{k:"お金"}], "みせ": [{k:"店"}], "りょうり": [{k:"料理"}], "おんがく": [{k:"音楽"}],
+    "えき": [{k:"駅"}], "みち": [{k:"道"}], "そら": [{k:"空"}], "うみ": [{k:"海"}], "やま": [{k:"山"}],
+    "あめ": [{k:"雨"}], "ゆき": [{k:"雪"}], "はる": [{k:"春"}], "なつ": [{k:"夏"}], "あき": [{k:"秋"}],
+    "ふゆ": [{k:"冬"}], "あさ": [{k:"朝"}], "ひる": [{k:"昼"}], "よる": [{k:"夜"}],
+    "からだ": [{k:"体"}], "あたま": [{k:"頭"}], "こころ": [{k:"心"}], "ちから": [{k:"力"}],
+    "せかい": [{k:"世界"}], "しゃしん": [{k:"写真"}], "えいが": [{k:"映画"}], "ほんとう": [{k:"本当"}],
+    "げんき": [{k:"元気"}], "だいじょうぶ": [{k:"大丈夫"}], "たいせつ": [{k:"大切"}],
+    "しんぶん": [{k:"新聞"}], "ざっし": [{k:"雑誌"}],
+    "りょこう": [{k:"旅行"}], "しゅみ": [{k:"趣味"}], "しごとば": [{k:"仕事場"}],
+
+    "きりました": [{k:"切りました",g:"刃物で切った"}],
+    "みました": [{k:"見ました"}],
+    "とりました": [{k:"撮りました",g:"写真を撮った"},{k:"取りました",g:"手に取った"}],
+    "あいました": [{k:"会いました",g:"人と会った"},{k:"合いました",g:"サイズが合った"}],
+    "かえりました": [{k:"帰りました"}],
+    "あけました": [{k:"開けました",g:"開いた"},{k:"明けました",g:"夜が明けた"}]
+  };
+  const MAX_WORD_LEN = Math.max(...Object.keys(DICT).map(k => k.length));
+
+  function segment(hiragana) {
+    const raw = [];
+    let i = 0;
+    while (i < hiragana.length) {
+      let matched = null;
+      for (let len = Math.min(MAX_WORD_LEN, hiragana.length - i); len >= 1; len--) {
+        const chunk = hiragana.slice(i, i + len);
+        if (DICT[chunk]) { matched = chunk; break; }
+      }
+      if (matched) { raw.push({ reading: matched, candidates: DICT[matched] }); i += matched.length; }
+      else { raw.push({ reading: hiragana[i], candidates: null }); i += 1; }
+    }
+    const merged = [];
+    for (const t of raw) {
+      const last = merged[merged.length - 1];
+      if (t.candidates === null && last && last.candidates === null) last.reading += t.reading;
+      else merged.push({ ...t });
+    }
+    return merged;
+  }
+
+  // ---------- UI ----------
+  const input = document.getElementById("romajiInput");
+  const preview = document.getElementById("preview");
+  const convertBtn = document.getElementById("convertBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const statusLine = document.getElementById("statusLine");
+  const errorBox = document.getElementById("imeErrorBox");
+  const transcript = document.getElementById("transcript");
+  const emptyHint = document.getElementById("emptyHint");
+  const examples = document.getElementById("examples");
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  input.addEventListener("input", () => {
+    const h = romajiToHiragana(input.value);
+    preview.textContent = h || "\u00a0";
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); convert(); }
+  });
+
+  examples.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-ex]");
+    if (!btn) return;
+    input.value = btn.dataset.ex;
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+  });
+
+  function showError(msg) {
+    errorBox.innerHTML = '<div class="error-box"><strong>変換に失敗しました:</strong> ' + esc(msg) + '</div>';
+  }
+  function clearError() { errorBox.innerHTML = ""; }
+
+  function buildDisambiguationRequest(hiragana, ambiguous) {
+    const questions = {};
+    ambiguous.forEach((t, idx) => {
+      const criteria = {};
+      t.candidates.forEach(c => { criteria[c.k] = c.g || c.k; });
+      questions["w" + idx] = {
+        type: "choice",
+        instructions: `文「${hiragana}」の中の「${t.reading}」という語について、文脈上最も適切な漢字表記を選んでください。`,
+        criteria
+      };
+    });
+    return { state: hiragana, questions };
+  }
+
+  async function convert() {
+    const romaji = input.value.trim();
+    if (!romaji) return;
+    clearError();
+    convertBtn.disabled = true;
+    statusLine.textContent = "変換中...";
+
+    try {
+      const hiragana = romajiToHiragana(romaji);
+      const tokens = segment(hiragana);
+      const ambiguous = tokens.filter(t => t.candidates && t.candidates.length > 1);
+
+      let resolvedByJev = {};
+      if (ambiguous.length > 0) {
+        const res = await fetch("/api/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildDisambiguationRequest(hiragana, ambiguous))
+        });
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch (e) { json = null; }
+        if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+        const answers = json.answers || {};
+        ambiguous.forEach((t, idx) => {
+          const ans = answers["w" + idx];
+          const validKanji = t.candidates.map(c => c.k);
+          resolvedByJev[idx] = (ans && validKanji.includes(ans.choice)) ? ans.choice : t.candidates[0].k;
+        });
+      }
+
+      let ambIdx = 0;
+      const partsHtml = tokens.map(t => {
+        if (t.candidates === null) return esc(t.reading);
+        if (t.candidates.length === 1) return esc(t.candidates[0].k);
+        const chosen = resolvedByJev[ambIdx];
+        const alt = t.candidates.map(c => c.k).filter(k => k !== chosen).join("/");
+        const html = `<span class="ai-word" title="読み: ${esc(t.reading)} / 他の候補: ${esc(alt)}">${esc(chosen)}</span>`;
+        ambIdx++;
+        return html;
+      });
+
+      appendBubble(romaji, partsHtml.join(""));
+      input.value = "";
+      preview.textContent = "\u00a0";
+      statusLine.textContent = ambiguous.length > 0
+        ? `Jevが${ambiguous.length}件の同音異義語を判断しました`
+        : "辞書だけで変換できました(Jevは呼んでいません)";
+    } catch (err) {
+      showError(err && err.message ? err.message : String(err));
+      statusLine.textContent = "";
+    } finally {
+      convertBtn.disabled = false;
+    }
+  }
+
+  function appendBubble(romaji, html) {
+    if (emptyHint) emptyHint.remove();
+    const div = document.createElement("div");
+    div.className = "bubble";
+    div.innerHTML = `<span class="romaji-src">${esc(romaji)}</span>${html}`;
+    transcript.appendChild(div);
+    requestAnimationFrame(() => div.classList.add("in"));
+  }
+
+  convertBtn.addEventListener("click", convert);
+  clearBtn.addEventListener("click", () => {
+    transcript.innerHTML = '<div class="empty-hint" id="emptyHint">変換すると、ここに確定した文章が積み重なっていきます。<br>紫色の「AI」マーク付きの単語は、Jevが前後の文脈から漢字を選んだ部分です。</div>';
+    statusLine.textContent = "";
+    clearError();
+  });
+})();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+
+  // ---------- レベルロジック ----------
+  const CORRECT_ACTION = { gap: 'jump', enemy_ground: 'jump', enemy_flying: 'duck', coin: 'jump', clear: 'run' };
+  const FATAL = { gap: true, enemy_ground: true, enemy_flying: true, coin: false, clear: false };
+  const DESCRIPTIONS = {
+    gap: '前方の地面が途切れており、穴が開いている。ジャンプしないと穴に落ちてしまう。',
+    enemy_ground: '前方の地面に敵が歩いている。ジャンプして飛び越えないとぶつかってしまう。',
+    enemy_flying: '前方に低空飛行する敵がいる。しゃがまないと頭にぶつかってしまう。ジャンプすると避けられずぶつかる。',
+    coin: '前方の空中にコインが浮いている。ジャンプすれば取れるが、取らなくても危険はない。',
+    clear: '前方の地面は平坦で、特に障害物はない。そのまま走り続ければよい。'
+  };
+  const ACTIONS_JA = { jump: 'ジャンプする', duck: 'しゃがむ', run: '何もせずそのまま走る' };
+  const NUM_SEGMENTS = 12;
+  const SEG_WIDTH = 200;
+
+  function seededRandom(seed) {
+    let s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function generateLevel(numSegments, seed) {
+    const rand = seededRandom(seed);
+    const weights = { gap: 3, enemy_ground: 3, enemy_flying: 2, coin: 3, clear: 2 };
+    const pool = [];
+    for (const [type, w] of Object.entries(weights)) for (let i = 0; i < w; i++) pool.push(type);
+    const segments = [];
+    for (let i = 0; i < numSegments; i++) {
+      const type = pool[Math.floor(rand() * pool.length)];
+      segments.push({ index: i, type, description: DESCRIPTIONS[type] });
+    }
+    return segments;
+  }
+  function buildLevelRequest(segments) {
+    const questions = {};
+    segments.forEach(seg => {
+      questions['s' + seg.index] = {
+        type: 'choice',
+        instructions: `${seg.index + 1}区画目の状況: ${seg.description} このときキャラクターが取るべき行動を選んでください。`,
+        criteria: ACTIONS_JA
+      };
+    });
+    return {
+      state: `横スクロールアクションゲームのコース。全${segments.length}区画を順番に通過する。各区画ごとに最適な行動を1つ選ぶ。`,
+      questions
+    };
+  }
+
+  // ---------- UI要素 ----------
+  const canvas = document.getElementById("stage");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const startBtn = document.getElementById("runnerStartBtn");
+  const newLevelBtn = document.getElementById("newLevelBtn");
+  const statusBanner = document.getElementById("statusBanner");
+  const errorBox = document.getElementById("runnerErrorBox");
+  const logEl = document.getElementById("log");
+
+  let seed = Math.floor(Math.random() * 1e9);
+  let level = generateLevel(NUM_SEGMENTS, seed);
+  let actionsByIndex = {};
+  let running = false;
+
+  function esc(s) { return String(s ?? "").replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c])); }
+
+  function renderLog(currentIdx, outcomes) {
+    logEl.innerHTML = level.map(seg => {
+      let cls = "log-chip";
+      if (outcomes[seg.index] === "ok") cls += " ok";
+      else if (outcomes[seg.index] === "fail") cls += " fail";
+      else if (seg.index === currentIdx) cls += " current";
+      const label = { gap:"穴", enemy_ground:"敵", enemy_flying:"飛敵", coin:"コイン", clear:"平地" }[seg.type];
+      const act = actionsByIndex[seg.index] ? ({jump:"跳",duck:"伏",run:"走"}[actionsByIndex[seg.index]]) : "?";
+      return `<span class="${cls}">${seg.index+1}:${label}(${act})</span>`;
+    }).join("");
+  }
+
+  function setBanner(kind, text) {
+    statusBanner.hidden = false;
+    statusBanner.className = "status-banner " + kind;
+    statusBanner.textContent = text;
+  }
+  function clearError() { errorBox.innerHTML = ""; }
+  function showError(msg) { errorBox.innerHTML = '<div class="error-box"><strong>失敗:</strong> ' + esc(msg) + '</div>'; }
+
+  // ---------- 描画(汎用ピクセルアート、特定作品のキャラクター意匠は使用しない) ----------
+  const GROUND_Y = H - 46;
+  const PLAYER_X = 90;
+
+  function drawBackground(camX) {
+    const grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+    grad.addColorStop(0, "#9fd6f2");
+    grad.addColorStop(1, "#d8ecf7");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, GROUND_Y);
+    // 雲(視差スクロール)
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    for (let i = 0; i < 6; i++) {
+      const cx = ((i * 260 - camX * 0.3) % (W + 300) + (W + 300)) % (W + 300) - 100;
+      const cy = 30 + (i % 3) * 22;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 26, 14, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx + 22, cy + 4, 20, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawGroundStrip(camX, levelWidth) {
+    ctx.fillStyle = "#7bbf6a";
+    ctx.fillRect(-camX, GROUND_Y, levelWidth, 10);
+    ctx.fillStyle = "#8a6a45";
+    ctx.fillRect(-camX, GROUND_Y + 10, levelWidth, H - GROUND_Y - 10);
+  }
+
+  function drawGap(x, width) {
+    ctx.fillStyle = "var(--sky-bottom)".startsWith("var") ? "#d8ecf7" : "#d8ecf7";
+    ctx.fillRect(x, GROUND_Y, width, H - GROUND_Y);
+  }
+
+  function drawGroundEnemy(x, walkPhase) {
+    const y = GROUND_Y;
+    const bob = Math.sin(walkPhase) * 2;
+    ctx.fillStyle = "#b5563c";
+    ctx.beginPath();
+    ctx.ellipse(x, y - 14 + bob, 16, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#3a2418";
+    ctx.beginPath(); ctx.arc(x - 6, y - 16 + bob, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 6, y - 16 + bob, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#8a3b28";
+    ctx.fillRect(x - 12, y - 3 + bob, 8, 6);
+    ctx.fillRect(x + 4, y - 3 + bob, 8, 6);
+  }
+
+  function drawFlyingEnemy(x, t) {
+    const y = GROUND_Y - 58 + Math.sin(t) * 6;
+    ctx.fillStyle = "#7b5cb0";
+    ctx.beginPath();
+    ctx.ellipse(x, y, 14, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const flap = Math.sin(t * 3) * 10;
+    ctx.fillStyle = "#a086d6";
+    ctx.beginPath(); ctx.ellipse(x - 10, y - flap, 10, 5, 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 10, y - flap, 10, 5, -0.4, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawCoin(x, collected, t) {
+    if (collected) return;
+    const y = GROUND_Y - 46 + Math.sin(t * 2) * 4;
+    const squash = Math.abs(Math.cos(t * 2));
+    ctx.fillStyle = "#f0c419";
+    ctx.beginPath();
+    ctx.ellipse(x, y, 9 * Math.max(0.3, squash), 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#c79a0e";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  function drawPlayer(y, ducking, dead, t) {
+    ctx.save();
+    ctx.translate(PLAYER_X, y);
+    if (dead) ctx.rotate(Math.PI / 2);
+    const h = ducking ? 18 : 30;
+    const w = ducking ? 22 : 16;
+    ctx.fillStyle = dead ? "#999" : "#e2533d";
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(-w/2, -h, w, h, 6) : ctx.rect(-w/2, -h, w, h);
+    ctx.fill();
+    ctx.fillStyle = dead ? "#777" : "#f4c9a0";
+    ctx.beginPath();
+    ctx.arc(0, -h - 6, 8, 0, Math.PI * 2);
+    ctx.fill();
+    if (!dead) {
+      ctx.fillStyle = "#2a2a2a";
+      ctx.beginPath(); ctx.arc(3, -h - 7, 1.4, 0, Math.PI * 2); ctx.fill();
+    }
+    if (!ducking && !dead) {
+      const legSwing = Math.sin(t * 12) * 6;
+      ctx.strokeStyle = "#e2533d";
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(-4 + legSwing, 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(4 - legSwing, 8); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function segCenterX(idx) { return idx * SEG_WIDTH + SEG_WIDTH / 2; }
+  function segObstacleX(idx) { return idx * SEG_WIDTH + SEG_WIDTH * 0.62; }
+
+  // ---------- 実行 ----------
+  function buildOutcomes() {
+    const outcomes = {};
+    for (const seg of level) {
+      const chosen = actionsByIndex[seg.index];
+      const correct = CORRECT_ACTION[seg.type];
+      outcomes[seg.index] = (chosen === correct) ? "ok" : (FATAL[seg.type] ? "fail" : "ok");
+    }
+    return outcomes;
+  }
+
+  function playRun() {
+    const levelWidth = level.length * SEG_WIDTH + 300;
+    const speed = 2.6; // px/frame
+    let camX = 0;
+    let playerY = GROUND_Y;
+    let vy = 0;
+    let ducking = false;
+    let dead = false;
+    let deadAt = null;
+    let coinsCollected = new Set();
+    let t = 0;
+    const GRAVITY = 0.9;
+    const JUMP_VY = -13;
+    const groundLevel = GROUND_Y;
+
+    const outcomes = {};
+
+    function currentSegmentIndex() {
+      return Math.min(level.length - 1, Math.floor((camX + PLAYER_X) / SEG_WIDTH));
+    }
+
+    function frame() {
+      t += 0.06;
+      camX += speed;
+      const segIdx = currentSegmentIndex();
+      const seg = level[segIdx];
+      const action = actionsByIndex[seg.index];
+      const obstacleWorldX = segObstacleX(seg.index);
+      const distToObstacle = obstacleWorldX - (camX + PLAYER_X);
+
+      // アクションのトリガー(障害物の手前で行動を開始)
+      if (!dead) {
+        if (action === "jump" && distToObstacle < 46 && distToObstacle > 10 && vy === 0 && playerY === groundLevel) {
+          vy = JUMP_VY;
+        }
+        if (action === "duck") {
+          ducking = distToObstacle < 60 && distToObstacle > -30;
+        } else {
+          ducking = false;
+        }
+
+        // 物理
+        if (vy !== 0 || playerY !== groundLevel) {
+          vy += GRAVITY;
+          playerY += vy;
+          if (playerY >= groundLevel) { playerY = groundLevel; vy = 0; }
+        }
+
+        // 判定(障害物地点を通過するタイミングで成否確定)
+        if (Math.abs(distToObstacle) < 4 && outcomes[seg.index] === undefined) {
+          const type = seg.type;
+          let ok;
+          if (type === "gap") ok = playerY < groundLevel - 6;
+          else if (type === "enemy_ground") ok = playerY < groundLevel - 10;
+          else if (type === "enemy_flying") ok = ducking;
+          else if (type === "coin") { ok = true; if (playerY < groundLevel - 10) coinsCollected.add(seg.index); }
+          else ok = true;
+
+          outcomes[seg.index] = ok ? "ok" : "fail";
+          if (!ok && FATAL[type]) { dead = true; deadAt = seg.index; }
+        }
+      }
+
+      // ---- 描画 ----
+      ctx.clearRect(0, 0, W, H);
+      drawBackground(camX);
+      drawGroundStrip(camX, levelWidth);
+
+      ctx.save();
+      ctx.translate(-camX, 0);
+      level.forEach(s => {
+        const ox = segObstacleX(s.index);
+        if (s.type === "gap") drawGap(ox - 28, 56);
+        else if (s.type === "enemy_ground" && outcomes[s.index] === undefined) drawGroundEnemy(ox, t * 4 + s.index);
+        else if (s.type === "enemy_flying" && outcomes[s.index] === undefined) drawFlyingEnemy(ox, t * 2 + s.index);
+        else if (s.type === "coin") drawCoin(ox, coinsCollected.has(s.index), t + s.index);
+      });
+      ctx.restore();
+
+      drawPlayer(playerY, ducking, dead, t);
+
+      renderLog(seg.index, outcomes);
+
+      if (dead) {
+        setBanner("dead", `${deadAt + 1}区画目(${{gap:"穴",enemy_ground:"敵",enemy_flying:"低空の敵"}[level[deadAt].type]})で失敗しました`);
+        finishRun(outcomes, false, coinsCollected.size);
+        return;
+      }
+      if (camX + PLAYER_X > levelWidth - 40) {
+        setBanner("clear", `コース クリア！ コイン ${coinsCollected.size} 枚獲得`);
+        finishRun(outcomes, true, coinsCollected.size);
+        return;
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function finishRun(outcomes, cleared, coins) {
+    running = false;
+    startBtn.disabled = false;
+    startBtn.textContent = "もう一度Jevに判断させる";
+    newLevelBtn.disabled = false;
+  }
+
+  async function askJev() {
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildLevelRequest(level))
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = null; }
+    if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+    const answers = json.answers || {};
+    const result = {};
+    level.forEach(seg => {
+      const ans = answers["s" + seg.index];
+      const valid = ["jump", "duck", "run"];
+      result[seg.index] = (ans && valid.includes(ans.choice)) ? ans.choice : "run";
+    });
+    return result;
+  }
+
+  async function start() {
+    if (running) return;
+    running = true;
+    startBtn.disabled = true;
+    newLevelBtn.disabled = true;
+    clearError();
+    setBanner("thinking", "Jevが全区画の行動プランを判断中...");
+    renderLog(-1, {});
+
+    try {
+      actionsByIndex = await askJev();
+      setBanner("thinking", "判断完了。プランどおりに走り抜けます...");
+      playRun();
+    } catch (err) {
+      running = false;
+      startBtn.disabled = false;
+      newLevelBtn.disabled = false;
+      statusBanner.hidden = true;
+      showError(err && err.message ? err.message : String(err));
+    }
+  }
+
+  function drawIdle() {
+    ctx.clearRect(0, 0, W, H);
+    drawBackground(0);
+    drawGroundStrip(0, W + 200);
+    drawPlayer(GROUND_Y, false, false, 0);
+  }
+
+  function newLevel() {
+    seed = Math.floor(Math.random() * 1e9);
+    level = generateLevel(NUM_SEGMENTS, seed);
+    actionsByIndex = {};
+    statusBanner.hidden = true;
+    clearError();
+    startBtn.textContent = "Jevに判断させて開始";
+    renderLog(-1, {});
+    drawIdle();
+  }
+
+  startBtn.addEventListener("click", start);
+  newLevelBtn.addEventListener("click", newLevel);
+
+  renderLog(-1, {});
+  drawIdle();
+})();
+
+</script>
+<script>
+
+(() => {
+  "use strict";
+
+  const WIN_THRESHOLD = 0.7;
+
+  const CLAIMS = [
+    { id: "pineapple", text: "パイナップルはピザのトッピングとして優れている" },
+    { id: "cat", text: "猫は犬より優れたペットである" },
+    { id: "breakfast", text: "朝ごはんは1日の食事の中で一番大切だ" },
+    { id: "wfh", text: "在宅勤務はオフィス勤務より生産的だ" },
+    { id: "book", text: "紙の本は電子書籍より優れている" },
+    { id: "summer", text: "夏は冬より良い季節だ" },
+    { id: "coffee", text: "コーヒーは紅茶より優れた飲み物だ" },
+    { id: "earlybird", text: "早起きは夜型より優れた生き方だ" }
+  ];
+
+  function buildPersuasionRequest(claimText, argument) {
+    const state = argument ? { claim: claimText, argument } : { claim: claimText };
+    return {
+      state,
+      questions: {
+        verdict: {
+          type: "noul",
+          instructions: argument
+            ? "state.argument で示された根拠を踏まえて、state.claim の主張に真剣に納得できるかどうか判定してください。的外れな主張や根拠のない主張には納得しないでください。"
+            : "特に根拠が示されていない状態で、state.claim の主張に一般常識に照らして納得できるかどうか判定してください。",
+          criteria: { true: "主張に納得できる", false: "納得できない" }
+        }
+      }
+    };
+  }
+  function isWin(confidence) { return typeof confidence === "number" && confidence >= WIN_THRESHOLD; }
+
+  // claimId -> { baseline: number|null, attempts: [{argument, confidence}], won: bool }
+  const state = {};
+  for (const c of CLAIMS) state[c.id] = { baseline: null, attempts: [], won: false };
+  let activeId = null;
+
+  const claimListEl = document.getElementById("claimList");
+  const claimTextEl = document.getElementById("claimText");
+  const meterPct = document.getElementById("meterPct");
+  const meterFill = document.getElementById("meterFill");
+  const meterDelta = document.getElementById("meterDelta");
+  const winBanner = document.getElementById("winBanner");
+  const argumentInput = document.getElementById("argumentInput");
+  const baselineBtn = document.getElementById("baselineBtn");
+  const persuadeBtn = document.getElementById("persuadeBtn");
+  const errorBox = document.getElementById("persuadeErrorBox");
+  const historyEl = document.getElementById("history");
+  const statsLine = document.getElementById("statsLine");
+
+  function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+  function pct(n) { return Math.round(Math.max(0, Math.min(1, n)) * 100); }
+
+  function renderClaimList() {
+    claimListEl.innerHTML = CLAIMS.map(c => {
+      const s = state[c.id];
+      const cls = "claim-chip" + (c.id === activeId ? "" : "") + (s.won ? " won" : "");
+      return `<button type="button" class="${cls}" data-id="${c.id}" aria-pressed="${c.id === activeId}">${esc(c.text.slice(0, 10))}${c.text.length > 10 ? "…" : ""}</button>`;
+    }).join("");
+  }
+
+  function renderStats() {
+    const wonCount = CLAIMS.filter(c => state[c.id].won).length;
+    const triedCount = CLAIMS.filter(c => state[c.id].attempts.length > 0 || state[c.id].baseline !== null).length;
+    statsLine.textContent = `説得成功 ${wonCount} / ${CLAIMS.length}件(挑戦済み ${triedCount}件)`;
+  }
+
+  function renderMeter(confidence, prevConfidence) {
+    if (confidence === null) {
+      meterPct.textContent = "--%";
+      meterFill.style.width = "0%";
+      meterDelta.textContent = "\u00a0";
+      meterDelta.className = "meter-delta";
+      return;
+    }
+    const p = pct(confidence);
+    meterPct.textContent = p + "%";
+    meterFill.style.width = p + "%";
+    if (prevConfidence !== null && prevConfidence !== undefined) {
+      const diff = p - pct(prevConfidence);
+      if (diff > 0) { meterDelta.textContent = `前回より +${diff}pt 上昇`; meterDelta.className = "meter-delta up"; }
+      else if (diff < 0) { meterDelta.textContent = `前回より ${diff}pt 下降`; meterDelta.className = "meter-delta down"; }
+      else { meterDelta.textContent = "前回から変化なし"; meterDelta.className = "meter-delta"; }
+    } else {
+      meterDelta.textContent = "\u00a0";
+      meterDelta.className = "meter-delta";
+    }
+  }
+
+  function renderHistory() {
+    const s = state[activeId];
+    if (!s || s.attempts.length === 0) {
+      historyEl.innerHTML = '<div style="font-size:0.8rem;color:var(--text-faint);font-family:-apple-system,sans-serif;">まだ説得を試みていません。</div>';
+      return;
+    }
+    historyEl.innerHTML = s.attempts.map((a, i) => `
+      <div class="history-item">
+        <span class="arg-text">試行${i+1}: ${esc(a.argument)}</span>
+        <span class="pct">${pct(a.confidence)}%</span>
+      </div>
+    `).reverse().join("");
+  }
+
+  function renderWinBanner() {
+    const s = state[activeId];
+    winBanner.innerHTML = (s && s.won) ? '<div class="win-banner">Jevを説得できました！</div>' : "";
+  }
+
+  function clearError() { errorBox.innerHTML = ""; }
+  function showError(msg) { errorBox.innerHTML = '<div class="error-box"><strong>失敗:</strong> ' + esc(msg) + '</div>'; }
+
+  function selectClaim(id) {
+    activeId = id;
+    const c = CLAIMS.find(x => x.id === id);
+    claimTextEl.textContent = c.text;
+    argumentInput.value = "";
+    clearError();
+    renderClaimList();
+    renderWinBanner();
+    const s = state[id];
+    const last = s.attempts.length ? s.attempts[s.attempts.length - 1].confidence : s.baseline;
+    renderMeter(last !== null && last !== undefined ? last : null, null);
+    renderHistory();
+  }
+
+  async function callJev(argument) {
+    const c = CLAIMS.find(x => x.id === activeId);
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildPersuasionRequest(c.text, argument))
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = null; }
+    if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+    const ans = json.answers && json.answers.verdict;
+    if (!ans || typeof ans.noul !== "number") throw new Error("Jevの応答からnoulが取得できませんでした: " + JSON.stringify(json));
+    return ans.noul;
+  }
+
+  async function getBaseline() {
+    if (!activeId) return;
+    clearError();
+    baselineBtn.disabled = true;
+    persuadeBtn.disabled = true;
+    try {
+      const conf = await callJev(null);
+      const s = state[activeId];
+      const prev = s.baseline;
+      s.baseline = conf;
+      renderMeter(conf, prev);
+      renderStats();
+    } catch (err) {
+      showError(err && err.message ? err.message : String(err));
+    } finally {
+      baselineBtn.disabled = false;
+      persuadeBtn.disabled = false;
+    }
+  }
+
+  async function persuade() {
+    if (!activeId) return;
+    const argument = argumentInput.value.trim();
+    if (!argument) { argumentInput.focus(); return; }
+    clearError();
+    baselineBtn.disabled = true;
+    persuadeBtn.disabled = true;
+    persuadeBtn.textContent = "説得中...";
+    try {
+      const conf = await callJev(argument);
+      const s = state[activeId];
+      const prev = s.attempts.length ? s.attempts[s.attempts.length - 1].confidence : s.baseline;
+      s.attempts.push({ argument, confidence: conf });
+      if (isWin(conf)) s.won = true;
+      renderMeter(conf, prev);
+      renderHistory();
+      renderWinBanner();
+      renderClaimList();
+      renderStats();
+    } catch (err) {
+      showError(err && err.message ? err.message : String(err));
+    } finally {
+      baselineBtn.disabled = false;
+      persuadeBtn.disabled = false;
+      persuadeBtn.textContent = "説得する";
+    }
+  }
+
+  claimListEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-id]");
+    if (!btn) return;
+    selectClaim(btn.dataset.id);
+  });
+  baselineBtn.addEventListener("click", getBaseline);
+  persuadeBtn.addEventListener("click", persuade);
+  argumentInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); persuade(); }
+  });
+
+  renderClaimList();
+  renderStats();
+})();
+
 </script>
 </body>
 </html>
