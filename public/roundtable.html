@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI ROUNDTABLE</title>
+<style>
+  :root {
+    --bg: oklch(16% 0.02 260);
+    --bg-2: oklch(20% 0.03 260);
+    --panel: oklch(21% 0.02 260);
+    --border: oklch(32% 0.02 260);
+    --text: oklch(92% 0.01 260);
+    --text-dim: oklch(70% 0.015 260);
+    --text-faint: oklch(52% 0.012 260);
+    --gold: oklch(80% 0.13 85);
+    --gold-soft: oklch(30% 0.06 85);
+    --accent: oklch(68% 0.14 250);
+    --accent-soft: oklch(28% 0.06 250);
+    --danger: oklch(65% 0.19 25);
+    --danger-soft: oklch(28% 0.07 25);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: oklch(95% 0.008 260);
+      --bg-2: oklch(91% 0.012 260);
+      --panel: oklch(99% 0.004 260);
+      --border: oklch(85% 0.01 260);
+      --text: oklch(22% 0.015 260);
+      --text-dim: oklch(46% 0.015 260);
+      --text-faint: oklch(60% 0.012 260);
+      --gold-soft: oklch(90% 0.08 85);
+      --accent-soft: oklch(90% 0.05 250);
+      --danger-soft: oklch(92% 0.06 25);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(1100px 550px at 50% -10%, var(--bg-2), var(--bg));
+    color: var(--text);
+    font: 400 15px/1.6 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 32px) clamp(14px, 4vw, 24px) 64px;
+  }
+  .wrap { max-width: 740px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 18px; }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.4rem, 4.5vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+  }
+  header p { margin: 5px 0 0; font-size: 0.82rem; color: var(--text-dim); }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  textarea, input[type="text"] {
+    width: 100%;
+    font: inherit;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    outline: none;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  textarea:focus-visible, input[type="text"]:focus-visible {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-soft);
+  }
+
+  .choice-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+  .choice-row .idx {
+    flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--bg-2); color: var(--text-faint);
+    font-size: 0.72rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .choice-row input { flex: 1 1 auto; }
+
+  button {
+    font: 700 0.84rem/1.4 inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: transform 90ms ease-out, background 150ms ease;
+  }
+  button:hover { background: var(--accent-soft); }
+  button:active { transform: scale(0.96); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  button.primary { background: var(--gold); color: oklch(18% 0.02 85); border-color: transparent; font-weight: 800; }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost { background: transparent; border-color: transparent; color: var(--text-dim); }
+  button.ghost:hover { background: var(--accent-soft); }
+  button.sm { padding: 5px 10px; font-size: 0.76rem; }
+
+  .n-row { display: flex; align-items: center; gap: 12px; }
+  .n-row input[type="range"] { flex: 1 1 auto; accent-color: var(--gold); }
+  .n-value { flex: 0 0 auto; font-weight: 800; font-size: 1.1rem; color: var(--gold); min-width: 3.2em; text-align: right; }
+
+  .run-bar { display: flex; justify-content: center; margin-top: 4px; }
+  .run-bar button { padding: 11px 28px; font-size: 0.95rem; }
+
+  .progress-wrap { margin-top: 12px; }
+  .progress-track { height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--gold); transition: width 300ms ease; }
+  .progress-text { font-size: 0.76rem; color: var(--text-faint); margin-top: 5px; text-align: center; }
+
+  .error-box {
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    background: var(--danger-soft);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 14px;
+  }
+
+  .result-bar-row { margin-bottom: 12px; }
+  .result-bar-row:last-child { margin-bottom: 0; }
+  .result-bar-head { display: flex; justify-content: space-between; font-size: 0.86rem; margin-bottom: 4px; }
+  .result-bar-head .label { font-weight: 700; }
+  .result-bar-head .stat { color: var(--text-faint); font-variant-numeric: tabular-nums; }
+  .result-bar-track { height: 20px; border-radius: 6px; background: var(--bg-2); overflow: hidden; }
+  .result-bar-fill { height: 100%; background: var(--accent); border-radius: 6px; transition: width 600ms cubic-bezier(0.16,1,0.3,1); }
+  .result-bar-row.winner .result-bar-fill { background: var(--gold); }
+  .result-bar-row.winner .label::before { content: "\1F3C6  "; }
+
+  details.persona-list { margin-top: 16px; }
+  details.persona-list summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+  .persona-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .persona-item {
+    font-size: 0.74rem;
+    padding: 6px 9px;
+    border-radius: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .persona-item .p-role { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .persona-item .p-vote { color: var(--gold); font-weight: 700; flex: 0 0 auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>AI ROUNDTABLE</h1>
+    <p>1つの問いに、10〜100の異なる視点を持つJevが同時に答え、集計する</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <span class="field-label">問い</span>
+      <textarea id="questionInput" placeholder="例: リモートワークとオフィス出社、どちらを標準にすべきか？">リモートワークとオフィス出社、どちらを標準にすべきか？</textarea>
+    </div>
+
+    <div class="field">
+      <span class="field-label">選択肢(2〜6個)</span>
+      <div id="choices"></div>
+      <button class="ghost sm" id="addChoiceBtn" style="margin-top:4px;">＋ 選択肢を追加</button>
+    </div>
+
+    <div class="field">
+      <span class="field-label">参加させるAIの人数</span>
+      <div class="n-row">
+        <input type="range" id="nSlider" min="10" max="100" step="5" value="30">
+        <span class="n-value" id="nValue">30人</span>
+      </div>
+    </div>
+
+    <div class="run-bar">
+      <button class="primary" id="runBtn">円卓会議を開く</button>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap" hidden>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 0 人</div>
+    </div>
+  </div>
+
+  <div id="errorBox"></div>
+
+  <div class="card" id="resultsCard" hidden>
+    <div id="resultsBars"></div>
+    <details class="persona-list">
+      <summary>個々の意見を見る</summary>
+      <div class="persona-grid" id="personaGrid"></div>
+    </details>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const ROLE_POOL = [
+    "経済的な観点から", "倫理的な観点から", "歴史的な視点から", "技術者として",
+    "楽観主義者として", "悲観主義者として", "子供の視点で", "高齢者の視点で",
+    "環境保護の観点から", "コスト重視の観点から", "リスク重視の観点から", "法律家の視点で",
+    "心理学的な観点から", "デザイナーの視点で", "投資家の視点で", "労働者の視点で",
+    "経営者の視点で", "消費者の視点で", "研究者の視点で", "教育者の視点で",
+    "医療従事者の視点で", "アーティストの視点で", "哲学者の視点で", "社会学者の視点で",
+    "地方在住者の視点で", "都市在住者の視点で", "起業家の視点で", "公務員の視点で",
+    "短期的な利益を重視する立場で", "長期的な持続可能性を重視する立場で", "現実主義者として",
+    "理想主義者として", "保守的な立場で", "革新的な立場で", "国際的な視点で",
+    "地域コミュニティの視点で", "ミニマリストの視点で", "実務担当者の視点で",
+    "顧客対応の最前線に立つ立場で", "統計データを重視する立場で", "直感を重視する立場で",
+    "多数派の意見を代弁する立場で", "少数派の意見を代弁する立場で", "初心者の視点で",
+    "熟練者の視点で", "セキュリティ担当者の視点で", "マーケターの視点で",
+    "エンジニアリングの効率を重視する立場で", "ユーザー体験を重視する立場で",
+    "倫理委員会のメンバーとして", "規制当局の視点で", "競合他社の視点で",
+    "次世代への影響を考える立場で", "文化的な多様性を重視する立場で",
+    "身体的な安全を最優先する立場で", "精神的な健康を重視する立場で",
+    "コミュニケーションの円滑さを重視する立場で", "透明性を重視する立場で",
+    "スピード重視の立場で", "慎重さを重視する立場で"
+  ];
+
+  function seededRandom(seed) {
+    let s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function shuffle(arr, rand) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function generatePersonas(n, seed) {
+    const rand = seededRandom(seed);
+    const base = shuffle(ROLE_POOL, rand);
+    const personas = [];
+    for (let i = 0; i < n; i++) {
+      if (i < base.length) personas.push(base[i]);
+      else {
+        const a = base[i % base.length];
+        const b = base[(i * 7 + 13) % base.length];
+        personas.push(a === b ? a : `${a}かつ${b}`);
+      }
+    }
+    return personas;
+  }
+  function buildRoundtableRequest(question, choiceEntries, personas) {
+    const criteria = {};
+    for (const c of choiceEntries) criteria[c.key] = c.label;
+    const questions = {};
+    personas.forEach((persona, i) => {
+      questions["p" + i] = {
+        type: "choice",
+        instructions: `${persona}、次の問いに対して最も適切だと思う選択肢を1つ選んでください: ${question}`,
+        criteria
+      };
+    });
+    return { state: `質問: ${question}`, questions };
+  }
+  function chunk(arr, size) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  }
+  function unwrapAnswers(json) {
+    if (json && typeof json === "object") {
+      if (json.answers) return json.answers;
+      if (json.result && typeof json.result === "object") return unwrapAnswers(json.result);
+    }
+    return {};
+  }
+
+  const BATCH_SIZE = 20;
+
+  // ---------- UI ----------
+  const questionInput = document.getElementById("questionInput");
+  const choicesEl = document.getElementById("choices");
+  const addChoiceBtn = document.getElementById("addChoiceBtn");
+  const nSlider = document.getElementById("nSlider");
+  const nValue = document.getElementById("nValue");
+  const runBtn = document.getElementById("runBtn");
+  const progressWrap = document.getElementById("progressWrap");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
+  const errorBox = document.getElementById("errorBox");
+  const resultsCard = document.getElementById("resultsCard");
+  const resultsBars = document.getElementById("resultsBars");
+  const personaGrid = document.getElementById("personaGrid");
+
+  function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+
+  let choices = [
+    { key: "remote", label: "リモートワークを標準にすべき" },
+    { key: "office", label: "オフィス出社を標準にすべき" }
+  ];
+
+  function renderChoices() {
+    choicesEl.innerHTML = choices.map((c, i) => `
+      <div class="choice-row" data-i="${i}">
+        <span class="idx">${i+1}</span>
+        <input type="text" class="choice-label" value="${esc(c.label)}" placeholder="選択肢${i+1}">
+        <button type="button" class="ghost sm remove-choice" ${choices.length <= 2 ? "disabled" : ""}>×</button>
+      </div>
+    `).join("");
+  }
+  choicesEl.addEventListener("input", (e) => {
+    if (!e.target.classList.contains("choice-label")) return;
+    const row = e.target.closest(".choice-row");
+    const i = Number(row.dataset.i);
+    choices[i].label = e.target.value;
+  });
+  choicesEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".remove-choice");
+    if (!btn) return;
+    const row = btn.closest(".choice-row");
+    const i = Number(row.dataset.i);
+    choices.splice(i, 1);
+    renderChoices();
+  });
+  addChoiceBtn.addEventListener("click", () => {
+    if (choices.length >= 6) return;
+    choices.push({ key: "opt" + Date.now(), label: "" });
+    renderChoices();
+  });
+
+  nSlider.addEventListener("input", () => { nValue.textContent = nSlider.value + "人"; });
+
+  function clearError() { errorBox.innerHTML = ""; }
+  function showError(msg) { errorBox.innerHTML = '<div class="error-box"><strong>失敗:</strong> ' + esc(msg) + '</div>'; }
+
+  async function runBatch(question, batchPersonas) {
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildRoundtableRequest(question, choices, batchPersonas))
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = null; }
+    if (!res.ok || json === null) throw new Error(json ? JSON.stringify(json) : text.slice(0, 400));
+    return unwrapAnswers(json);
+  }
+
+  function renderResults(personaVotes) {
+    const counts = {};
+    for (const c of choices) counts[c.key] = 0;
+    let total = 0;
+    for (const pv of personaVotes) {
+      if (pv.choice && Object.prototype.hasOwnProperty.call(counts, pv.choice)) {
+        counts[pv.choice]++;
+        total++;
+      }
+    }
+    const ranked = choices.map(c => ({ key: c.key, label: c.label, count: counts[c.key], pct: total ? counts[c.key]/total : 0 }))
+      .sort((a,b) => b.count - a.count);
+
+    resultsBars.innerHTML = ranked.map((r, i) => `
+      <div class="result-bar-row ${i===0 && r.count>0 ? "winner" : ""}">
+        <div class="result-bar-head">
+          <span class="label">${esc(r.label)}</span>
+          <span class="stat">${r.count}票 (${Math.round(r.pct*100)}%)</span>
+        </div>
+        <div class="result-bar-track"><div class="result-bar-fill" style="width:${Math.round(r.pct*100)}%"></div></div>
+      </div>
+    `).join("");
+
+    personaGrid.innerHTML = personaVotes.map(pv => {
+      const label = choices.find(c => c.key === pv.choice);
+      return `<div class="persona-item"><span class="p-role">${esc(pv.persona)}</span><span class="p-vote">${esc(label ? label.label : "?")}</span></div>`;
+    }).join("");
+
+    resultsCard.hidden = false;
+  }
+
+  async function run() {
+    const question = questionInput.value.trim();
+    if (!question) { questionInput.focus(); return; }
+    const validChoices = choices.filter(c => c.label.trim());
+    if (validChoices.length < 2) { showError("選択肢を2つ以上入力してください。"); return; }
+    choices = validChoices;
+
+    const n = Number(nSlider.value);
+    clearError();
+    resultsCard.hidden = true;
+    runBtn.disabled = true;
+    progressWrap.hidden = false;
+    progressFill.style.width = "0%";
+    progressText.textContent = "0 / " + n + " 人";
+
+    const personas = generatePersonas(n, Date.now() % 1e9);
+    const batches = chunk(personas, BATCH_SIZE);
+    const personaVotes = [];
+
+    try {
+      let done = 0;
+      let offset = 0;
+      for (const batch of batches) {
+        const answers = await runBatch(question, batch);
+        batch.forEach((persona, i) => {
+          const ans = answers["p" + i];
+          personaVotes.push({ persona, choice: ans ? ans.choice : null });
+        });
+        done += batch.length;
+        offset += batch.length;
+        progressFill.style.width = Math.round((done/n)*100) + "%";
+        progressText.textContent = done + " / " + n + " 人";
+      }
+      renderResults(personaVotes);
+    } catch (err) {
+      showError(err && err.message ? err.message : String(err));
+    } finally {
+      runBtn.disabled = false;
+      progressWrap.hidden = true;
+    }
+  }
+
+  runBtn.addEventListener("click", run);
+
+  renderChoices();
+})();
+</script>
+</body>
+</html>
